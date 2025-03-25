@@ -1,3 +1,8 @@
 spring:
   application:
     name: ddtube
+ddtube:
+  playlist:
+    code_length: 5
+  user:
+    code_length: 5
