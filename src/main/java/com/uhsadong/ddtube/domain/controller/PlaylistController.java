@@ -30,7 +30,7 @@ public class PlaylistController {
     }
 
     @DeleteMapping("/{playlistId}")
-    @Operation(summary = "재생목록 생성", description = "재생목록 생성 기능입니다.")
+    @Operation(summary = "재생목록 삭제", description = "재생목록 삭제 기능입니다.")
     public ResponseEntity<String> deletePlaylist(
         @PathVariable Long playlistId
     ) {
