@@ -32,6 +32,10 @@ public class User {
     @ManyToOne(fetch = FetchType.LAZY)
     private Playlist playlist;
 
+    @Column(nullable = false, length = 5, unique = true)
+    @Length(min = 5, max = 5)
+    private String code; // 5자리 AlphaNumeric
+
     @Length(min=2, max=20)
     @Column(nullable = false, length = 20)
     private String name;
@@ -45,4 +49,14 @@ public class User {
     @Column(updatable = false)
     private LocalDateTime createdAt;
 
+
+    public static User toEntity(Playlist playlist, String code, String name, String password, boolean isAdmin) {
+        return User.builder()
+            .playlist(playlist)
+            .code(code)
+            .name(name)
+            .password(password)
+            .isAdmin(isAdmin)
+            .build();
+    }
 }

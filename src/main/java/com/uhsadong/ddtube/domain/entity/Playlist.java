@@ -29,19 +29,33 @@ public class Playlist {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 5)
+    @Column(nullable = false, length = 5, unique = true)
     @Length(min = 5, max = 5)
     private String code; // 5자리 AlphaNumeric
+
+    @Column(nullable = false, length = 100)
+    @Length(min = 1, max = 100)
+    private String title;
     @Length(min = 4, max = 4)
     @Column(nullable = false)
     @Pattern(regexp = "\\d{4}", message = "PIN must be a 4-digit number")
     private String pin; // 4자리 숫자
+
     @Column(nullable = false)
-    private LocalDate willDeleteAt;
+    private LocalDateTime willDeleteAt;
 
     @CreatedDate
     @Column(updatable = false)
     private LocalDateTime createdAt;
 
+
+    public static Playlist toEntity(String code, String title, String pin, LocalDateTime willDeleteAt) {
+        return Playlist.builder()
+            .code(code)
+            .title(title)
+            .pin(pin)
+            .willDeleteAt(willDeleteAt)
+            .build();
+    }
 
 }
