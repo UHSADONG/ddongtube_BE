@@ -5,7 +5,9 @@ import com.uhsadong.ddtube.domain.entity.Playlist;
 import com.uhsadong.ddtube.domain.entity.User;
 import com.uhsadong.ddtube.domain.repository.PlaylistRepository;
 import com.uhsadong.ddtube.global.util.IdGenerator;
+import jakarta.transaction.Transactional;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -16,6 +18,8 @@ public class PlaylistCommandService {
 
     @Value("${ddtube.playlist.code_length}")
     private Integer PLAYLIST_CODE_LENGTH;
+    @Value("${ddtube.playlist.delete_hours}")
+    private Integer PLAYLIST_DELETE_HOURS;
 
     private final PlaylistRepository playlistRepository;
     private final UserCommandService userCommandService;
@@ -26,9 +30,10 @@ public class PlaylistCommandService {
      * @param requestDTO
      * @return
      */
+    @Transactional
     public String createPlaylist(CreatePlaylistRequestDTO requestDTO) {
         String code = IdGenerator.generateShortId(PLAYLIST_CODE_LENGTH);
-        LocalDate willDeleteAt = LocalDate.now().plusDays(7);
+        LocalDateTime willDeleteAt = LocalDateTime.now().plusHours(PLAYLIST_DELETE_HOURS);
         Playlist playlist = playlistRepository.save(
             Playlist.toEntity(
                 code, requestDTO.playlistTitle(), requestDTO.playlistPin(), willDeleteAt

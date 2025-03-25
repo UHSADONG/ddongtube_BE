@@ -42,14 +42,14 @@ public class Playlist {
     private String pin; // 4자리 숫자
 
     @Column(nullable = false)
-    private LocalDate willDeleteAt;
+    private LocalDateTime willDeleteAt;
 
     @CreatedDate
     @Column(updatable = false)
     private LocalDateTime createdAt;
 
 
-    public static Playlist toEntity(String code, String title, String pin, LocalDate willDeleteAt) {
+    public static Playlist toEntity(String code, String title, String pin, LocalDateTime willDeleteAt) {
         return Playlist.builder()
             .code(code)
             .title(title)

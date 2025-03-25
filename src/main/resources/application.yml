@@ -4,5 +4,6 @@ spring:
 ddtube:
   playlist:
     code_length: 5
+    delete_hours: 6
   user:
     code_length: 5
