@@ -1,4 +1,4 @@
-package org.eple0329.ddtube;
+package com.uhsadong.ddtube;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

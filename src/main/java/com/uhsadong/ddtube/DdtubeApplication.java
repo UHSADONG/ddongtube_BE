@@ -1,4 +1,4 @@
-package org.eple0329.ddtube;
+package com.uhsadong.ddtube;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
