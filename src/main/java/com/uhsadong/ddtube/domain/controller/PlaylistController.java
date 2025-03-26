@@ -32,7 +32,7 @@ public class PlaylistController {
     }
 
     @PostMapping()
-    @Operation(summary = "재생목록 생성", description = "재생목록을 생성합니다. 생성하는 유저는 필수적으로 name과 password를 입력해야합니다.")
+    @Operation(summary = "[0326] 재생목록 생성", description = "재생목록을 생성합니다. 생성하는 유저는 필수적으로 name과 password를 입력해야합니다.")
     public ResponseEntity<String> createPlaylist(
         @RequestBody @Valid CreatePlaylistRequestDTO createPlaylistRequestDTO
     ) {
