@@ -1,11 +1,15 @@
 package com.uhsadong.ddtube.domain.controller;
 
+import com.uhsadong.ddtube.domain.dto.request.AddVideoToPlaylistRequestDTO;
+import com.uhsadong.ddtube.domain.service.VideoCommandService;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -14,21 +18,25 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/video")
 public class VideoController {
 
-    @PostMapping("/{playlistId}")
+    private final VideoCommandService videoCommandService;
+
+    @PostMapping("/{playlistCode}")
     @Operation(summary = "재생목록에 영상 추가", description = "재생목록에 영상을 추가하는 기능입니다.")
     public ResponseEntity<String> addVideoToPlaylist(
-        @PathVariable Long playlistId
+        @PathVariable String playlistCode,
+        @RequestBody @Valid AddVideoToPlaylistRequestDTO addVideoToPlaylistRequestDTO
     ) {
-        return ResponseEntity.ok(Long.toString(playlistId));
+        videoCommandService.addVideoToPlaylist(playlistCode, addVideoToPlaylistRequestDTO);
+        return ResponseEntity.ok("추가 완료");
     }
 
-    @DeleteMapping("/{playlistId}/{videoId}")
+    @DeleteMapping("/{playlistCode}/{videoId}")
     @Operation(summary = "재생목록에서 영상 제거", description = "재생목록에 영상을 제거하는 기능입니다.")
     public ResponseEntity<String> deleteVideoInPlaylist(
-        @PathVariable Long playlistId,
+        @PathVariable Long playlistCode,
         @PathVariable Long videoId
     ) {
-        return ResponseEntity.ok(Long.toString(playlistId));
+        return ResponseEntity.ok(Long.toString(playlistCode));
     }
 
 }

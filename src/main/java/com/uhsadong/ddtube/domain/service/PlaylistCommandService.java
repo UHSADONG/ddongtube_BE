@@ -6,7 +6,6 @@ import com.uhsadong.ddtube.domain.entity.User;
 import com.uhsadong.ddtube.domain.repository.PlaylistRepository;
 import com.uhsadong.ddtube.global.util.IdGenerator;
 import jakarta.transaction.Transactional;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,13 +15,12 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class PlaylistCommandService {
 
+    private final PlaylistRepository playlistRepository;
+    private final UserCommandService userCommandService;
     @Value("${ddtube.playlist.code_length}")
     private Integer PLAYLIST_CODE_LENGTH;
     @Value("${ddtube.playlist.delete_hours}")
     private Integer PLAYLIST_DELETE_HOURS;
-
-    private final PlaylistRepository playlistRepository;
-    private final UserCommandService userCommandService;
 
     /**
      * 재생목록을 생성함 + 동시에 재생목록을 생성한 사람의 정보도 생성함
@@ -36,7 +34,7 @@ public class PlaylistCommandService {
         LocalDateTime willDeleteAt = LocalDateTime.now().plusHours(PLAYLIST_DELETE_HOURS);
         Playlist playlist = playlistRepository.save(
             Playlist.toEntity(
-                code, requestDTO.playlistTitle(), requestDTO.playlistPin(), willDeleteAt
+                code, requestDTO.playlistTitle(), willDeleteAt
             )
         );
 
