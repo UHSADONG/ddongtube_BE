@@ -26,7 +26,7 @@ public class PlaylistController {
     @GetMapping("/{playlistCode}")
     @Operation(summary = "재생목록 조회", description = "재생목록 조회 기능입니다.")
     public ResponseEntity<ApiResponse<String>> getPlaylist(
-        @PathVariable Long playlistCode
+        @PathVariable String playlistCode
     ) {
         return ResponseEntity.ok(ApiResponse.onSuccess("Hello, World!"));
     }
@@ -44,7 +44,7 @@ public class PlaylistController {
     @DeleteMapping("/{playlistCode}")
     @Operation(summary = "재생목록 삭제", description = "재생목록 삭제 기능입니다.")
     public ResponseEntity<ApiResponse<String>> deletePlaylist(
-        @PathVariable Long playlistCode
+        @PathVariable String playlistCode
     ) {
         return ResponseEntity.ok(ApiResponse.onSuccess("Hello, World!"));
     }

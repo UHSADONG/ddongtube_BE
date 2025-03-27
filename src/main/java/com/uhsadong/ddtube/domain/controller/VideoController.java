@@ -34,10 +34,10 @@ public class VideoController {
     @DeleteMapping("/{playlistCode}/{videoId}")
     @Operation(summary = "재생목록에서 영상 제거", description = "재생목록에 영상을 제거하는 기능입니다.")
     public ResponseEntity<ApiResponse<String>> deleteVideoInPlaylist(
-        @PathVariable Long playlistCode,
+        @PathVariable String playlistCode,
         @PathVariable Long videoId
     ) {
-        return ResponseEntity.ok(ApiResponse.onSuccess(Long.toString(playlistCode)));
+        return ResponseEntity.ok(ApiResponse.onSuccess(playlistCode));
     }
 
 }
