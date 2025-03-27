@@ -2,15 +2,16 @@ package com.uhsadong.ddtube.domain.controller;
 
 import com.uhsadong.ddtube.domain.dto.request.CreatePlaylistRequestDTO;
 import com.uhsadong.ddtube.domain.dto.response.CreatePlaylistResponseDTO;
+import com.uhsadong.ddtube.domain.dto.response.PlaylistMetaResponseDTO;
 import com.uhsadong.ddtube.domain.entity.User;
 import com.uhsadong.ddtube.domain.service.PlaylistCommandService;
+import com.uhsadong.ddtube.domain.service.PlaylistQueryService;
 import com.uhsadong.ddtube.global.response.ApiResponse;
 import com.uhsadong.ddtube.global.security.CurrentUser;
 import com.uhsadong.ddtube.global.util.S3Util;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,6 +30,7 @@ public class PlaylistController {
 
     private final PlaylistCommandService playlistCommandService;
     private final S3Util s3Util;
+    private final PlaylistQueryService playlistQueryService;
 
     @GetMapping("/{playlistCode}")
     @Operation(summary = "재생목록 조회", description = "재생목록 조회 기능입니다.")
@@ -37,6 +39,17 @@ public class PlaylistController {
         @PathVariable String playlistCode
     ) {
         return ResponseEntity.ok(ApiResponse.onSuccess("Hello, World!"));
+    }
+
+    @GetMapping("/meta/{playlistCode}")
+    @Operation(summary = "재생목록 메타정보 조회", description = "초대장에서 사용할 메타정보 조회 기능입니다.")
+    public ResponseEntity<ApiResponse<PlaylistMetaResponseDTO>> getPlaylistMeta(
+        @CurrentUser User user,
+        @PathVariable String playlistCode
+    ) {
+        return ResponseEntity.ok(ApiResponse.onSuccess(
+            playlistQueryService.getPlaylistMetaInformation(user, playlistCode)
+        ));
     }
 
     @PostMapping()

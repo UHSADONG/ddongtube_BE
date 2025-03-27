@@ -1,6 +1,7 @@
 package com.uhsadong.ddtube.domain.repository;
 
 import com.uhsadong.ddtube.domain.entity.User;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -9,4 +10,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findFirstByPlaylistCodeAndName(String playlistCode, String name);
 
     Optional<User> findByCode(String code);
+
+    List<User> findAllByPlaylistCode(String playlistCode);
 }
