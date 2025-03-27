@@ -32,9 +32,6 @@ public class S3Util {
         ObjectMetadata metadata = new ObjectMetadata();
         metadata.setContentLength(file.getSize());
         metadata.setContentType(file.getContentType());
-        metadata.setContentDisposition("inline");
-        log.info("Content-Type: " + file.getContentType());
-
 
         try {
             PutObjectRequest putObjectRequest = new PutObjectRequest(
@@ -59,7 +56,7 @@ public class S3Util {
         return String.format("%s%s", uuid, ext); // 예: images/uuid.jpg
     }
 
-    public boolean isS3Url(String url){
+    public boolean isS3Url(String url) {
         String s3Prefix1 = String.format("https://%s.s3.%s.amazonaws.com/", bucketName, region);
 
         return url.startsWith(s3Prefix1);
