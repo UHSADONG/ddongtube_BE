@@ -8,7 +8,8 @@ public record CreatePlaylistRequestDTO(
     @Length(max = 100, message = "비밀번호는 100자 이하여야 합니다.")
     String userPassword, // 만든사람 비밀번호
     @Length(min = 1, max = 100, message = "재생목록 제목은 1자 이상 100자 이하여야 합니다.")
-    String playlistTitle // 재생목록 제목
+    String playlistTitle, // 재생목록 제목
+    String thumbnailUrl // 썸네일 URL
 ) {
 
 }

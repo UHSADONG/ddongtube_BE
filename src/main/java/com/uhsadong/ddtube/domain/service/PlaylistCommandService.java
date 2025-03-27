@@ -4,7 +4,10 @@ import com.uhsadong.ddtube.domain.dto.request.CreatePlaylistRequestDTO;
 import com.uhsadong.ddtube.domain.dto.response.CreatePlaylistResponseDTO;
 import com.uhsadong.ddtube.domain.entity.Playlist;
 import com.uhsadong.ddtube.domain.repository.PlaylistRepository;
+import com.uhsadong.ddtube.global.response.code.status.ErrorStatus;
+import com.uhsadong.ddtube.global.response.exception.GeneralException;
 import com.uhsadong.ddtube.global.util.IdGenerator;
+import com.uhsadong.ddtube.global.util.S3Util;
 import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
@@ -17,23 +20,33 @@ public class PlaylistCommandService {
 
     private final PlaylistRepository playlistRepository;
     private final UserCommandService userCommandService;
+    private final S3Util s3Util;
     @Value("${ddtube.playlist.code_length}")
     private Integer PLAYLIST_CODE_LENGTH;
     @Value("${ddtube.playlist.delete_hours}")
     private Integer PLAYLIST_DELETE_HOURS;
 
+    @Value("${aws.s3.default-thumbneil-url}")
+    private String defaultThumbnailUrl;
+
     /**
      * 재생목록을 생성함 + 동시에 재생목록을 생성한 사람의 정보도 생성함
-
      */
     @Transactional
-    public CreatePlaylistResponseDTO createPlaylist(CreatePlaylistRequestDTO requestDTO) {
+    public CreatePlaylistResponseDTO createPlaylist(
+        CreatePlaylistRequestDTO requestDTO
+    ) {
         String code = IdGenerator.generateShortId(PLAYLIST_CODE_LENGTH);
         LocalDateTime willDeleteAt = LocalDateTime.now().plusHours(PLAYLIST_DELETE_HOURS);
+
+        if (!(s3Util.isS3Url(requestDTO.thumbnailUrl()) || requestDTO.thumbnailUrl().isEmpty())) {
+            throw new GeneralException(ErrorStatus._INVALID_THUMBNAIL_URL);
+        }
+        String thumbnailUrl = requestDTO.thumbnailUrl().isEmpty()
+            ? defaultThumbnailUrl : requestDTO.thumbnailUrl();
+
         Playlist playlist = playlistRepository.save(
-            Playlist.toEntity(
-                code, requestDTO.playlistTitle(), willDeleteAt
-            )
+            Playlist.toEntity(code, requestDTO.playlistTitle(), thumbnailUrl, willDeleteAt)
         );
 
         String accessToken = userCommandService.createPlaylistCreator(

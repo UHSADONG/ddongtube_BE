@@ -35,6 +35,9 @@ public class Playlist {
     @Length(min = 1, max = 100)
     private String title;
 
+    @Column(nullable = true)
+    private String thumbnailUrl;
+
     @Column(nullable = false)
     private LocalDateTime willDeleteAt;
 
@@ -43,10 +46,11 @@ public class Playlist {
     private LocalDateTime createdAt;
 
 
-    public static Playlist toEntity(String code, String title, LocalDateTime willDeleteAt) {
+    public static Playlist toEntity(String code, String title, String thumbnailUrl ,LocalDateTime willDeleteAt) {
         return Playlist.builder()
             .code(code)
             .title(title)
+            .thumbnailUrl(thumbnailUrl)
             .willDeleteAt(willDeleteAt)
             .build();
     }
