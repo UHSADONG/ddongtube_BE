@@ -73,7 +73,7 @@ public class PlaylistController {
     }
 
     @PostMapping("/thumbnail")
-    @Operation(summary = "썸네일 업로드", description = "재생목록을 만들 때 썸네일을 업로드합니다. 여기서 반환되는 전체 url을 재생목록을 생성할 때 넣어주시면 됩니다.")
+    @Operation(summary = "[0328] 썸네일 업로드", description = "재생목록을 만들 때 썸네일을 업로드합니다. 여기서 반환되는 전체 url을 재생목록을 생성할 때 넣어주시면 됩니다.")
     public ResponseEntity<ApiResponse<String>> uploadToS3(
         @RequestPart(value = "file") MultipartFile file
     ) {
