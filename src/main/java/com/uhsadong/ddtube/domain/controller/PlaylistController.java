@@ -2,6 +2,7 @@ package com.uhsadong.ddtube.domain.controller;
 
 import com.uhsadong.ddtube.domain.dto.request.CreatePlaylistRequestDTO;
 import com.uhsadong.ddtube.domain.dto.response.CreatePlaylistResponseDTO;
+import com.uhsadong.ddtube.domain.dto.response.PlaylistDetailResponseDTO;
 import com.uhsadong.ddtube.domain.dto.response.PlaylistMetaResponseDTO;
 import com.uhsadong.ddtube.domain.entity.User;
 import com.uhsadong.ddtube.domain.service.PlaylistCommandService;
@@ -34,11 +35,13 @@ public class PlaylistController {
 
     @GetMapping("/{playlistCode}")
     @Operation(summary = "재생목록 조회", description = "재생목록 조회 기능입니다.")
-    public ResponseEntity<ApiResponse<String>> getPlaylist(
+    public ResponseEntity<ApiResponse<PlaylistDetailResponseDTO>> getPlaylist(
         @CurrentUser User user,
         @PathVariable String playlistCode
     ) {
-        return ResponseEntity.ok(ApiResponse.onSuccess("Hello, World!"));
+        return ResponseEntity.ok(ApiResponse.onSuccess(
+            playlistQueryService.getPlaylistDetail(user, playlistCode)
+        ));
     }
 
     @GetMapping("/meta/{playlistCode}")

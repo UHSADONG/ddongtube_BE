@@ -43,7 +43,7 @@ public class Video {
     private String title;
     @Length(max = 100)
     @Column(nullable = false, length = 100)
-    private String author_name;
+    private String authorName;
     @Length(max = 1000)
     @Column(nullable = false, length = 1000)
     private String url;
@@ -51,9 +51,9 @@ public class Video {
     private Integer width;
     @Length(max = 1000)
     @Column(nullable = false, length = 1000)
-    private String thumbnail_url;
-    private Integer thumbnail_height;
-    private Integer thumbnail_width;
+    private String thumbnailUrl;
+    private Integer thumbnailHeight;
+    private Integer thumbnailWidth;
 
     @CreatedDate
     @Column(updatable = false)
@@ -65,13 +65,13 @@ public class Video {
             .user(user)
             .code(code)
             .title(youtubeInfo.title())
-            .author_name(youtubeInfo.author_name())
+            .authorName(youtubeInfo.author_name())
             .url(videoUrl)
             .height(youtubeInfo.height())
             .width(youtubeInfo.width())
-            .thumbnail_url(youtubeInfo.thumbnail_url())
-            .thumbnail_height(Integer.valueOf(youtubeInfo.thumbnail_height()))
-            .thumbnail_width(Integer.valueOf(youtubeInfo.thumbnail_width()))
+            .thumbnailUrl(youtubeInfo.thumbnail_url())
+            .thumbnailHeight(Integer.valueOf(youtubeInfo.thumbnail_height()))
+            .thumbnailWidth(Integer.valueOf(youtubeInfo.thumbnail_width()))
             .build();
     }
 }

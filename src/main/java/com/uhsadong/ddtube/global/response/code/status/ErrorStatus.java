@@ -32,6 +32,7 @@ public enum ErrorStatus implements BaseErrorCode {
     _USER_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "USER001", "이미 존재하는 사용자이며, 비밀번호가 틀렸습니다."),
     _USER_NOT_FOUND(HttpStatus.BAD_REQUEST, "USER002", "해당 사용자를 찾을 수 없습니다."),
     _CREATOR_NOT_FOUND(HttpStatus.BAD_REQUEST, "USER003", "해당 플레이리스트의 생성자를 찾을 수 없습니다."),
+    _USER_NOT_IN_PLAYLIST(HttpStatus.BAD_REQUEST, "USER004", "해당 사용자는 해당 플레이리스트에 속해있지 않습니다."),
 
     // VIDEO
     _VIDEO_NOT_FOUND(HttpStatus.BAD_REQUEST, "VIDEO001", "해당 비디오를 찾을 수 없습니다."),
