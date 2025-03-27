@@ -1,6 +1,8 @@
 package com.uhsadong.ddtube.domain.service;
 
+import com.uhsadong.ddtube.domain.dto.response.PlaylistDetailResponseDTO;
 import com.uhsadong.ddtube.domain.dto.response.PlaylistMetaResponseDTO;
+import com.uhsadong.ddtube.domain.dto.response.VideoDetailResponseDTO;
 import com.uhsadong.ddtube.domain.entity.Playlist;
 import com.uhsadong.ddtube.domain.entity.User;
 import com.uhsadong.ddtube.domain.repository.PlaylistRepository;
@@ -16,6 +18,7 @@ public class PlaylistQueryService {
 
     private final PlaylistRepository playlistRepository;
     private final UserQueryService userQueryService;
+    private final VideoQueryService videoQueryService;
 
     public Playlist getPlaylistByCodeOrThrow(String code) {
         return playlistRepository.findFirstByCode(code)
@@ -24,6 +27,7 @@ public class PlaylistQueryService {
 
     public PlaylistMetaResponseDTO getPlaylistMetaInformation(User user, String playlistCode) {
         Playlist playlist = getPlaylistByCodeOrThrow(playlistCode);
+        userQueryService.checkUserInPlaylist(user, playlist);
         List<User> userList = userQueryService.getUserListByPlaylistCode(playlistCode);
 
         String ownerName = userList.stream()
@@ -43,7 +47,18 @@ public class PlaylistQueryService {
             .owner(ownerName)
             .userList(userNameList)
             .build();
+    }
 
+    public PlaylistDetailResponseDTO getPlaylistDetail(User user, String playlistCode) {
+        Playlist playlist = getPlaylistByCodeOrThrow(playlistCode);
+        userQueryService.checkUserInPlaylist(user, playlist);
+
+        List<VideoDetailResponseDTO> videoResponseList = videoQueryService.getVideoDetailListByPlaylistCode(
+            playlistCode);
+        return PlaylistDetailResponseDTO.builder()
+            .title(playlist.getTitle())
+            .videoList(videoResponseList)
+            .build();
     }
 
 }

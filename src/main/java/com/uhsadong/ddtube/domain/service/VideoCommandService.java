@@ -23,17 +23,17 @@ public class VideoCommandService {
 
     private final VideoRepository videoRepository;
     private final PlaylistQueryService playlistQueryService;
+    private final UserQueryService userQueryService;
     @Value("${ddtube.video.code_length}")
     private int VIDEO_CODE_LENGTH;
 
     @Transactional
     public void addVideoToPlaylist(
         User user, String playlistCode, AddVideoToPlaylistRequestDTO requestDTO) {
-        log.info(user.getCode());
-        String code = IdGenerator.generateShortId(VIDEO_CODE_LENGTH);
-
         Playlist playlist = playlistQueryService.getPlaylistByCodeOrThrow(playlistCode);
+        userQueryService.checkUserInPlaylist(user, playlist);
 
+        String code = IdGenerator.generateShortId(VIDEO_CODE_LENGTH);
         YoutubeOEmbedDTO youtubeOEmbedDTO = YoutubeOEmbed.getVideoInfo(requestDTO.videoUrl());
         videoRepository.save(
             Video.toEntity(playlist, user, code, requestDTO.videoUrl(), youtubeOEmbedDTO)
@@ -44,10 +44,11 @@ public class VideoCommandService {
     public void deleteVideoFromPlaylist(
         User user, String playlistCode, String videoCode) {
         Playlist playlist = playlistQueryService.getPlaylistByCodeOrThrow(playlistCode);
+        userQueryService.checkUserInPlaylist(user, playlist);
         Video video = videoRepository.findFirstByPlaylistCodeAndCode(playlist.getCode(), videoCode)
             .orElseThrow(() -> new GeneralException(ErrorStatus._VIDEO_NOT_FOUND));
         // 영상을 추가한 사람이거나 플레이리스트의 관리자가 아니면 에러
-        if(!(video.getUser().getId().equals(user.getId()) || user.isAdmin())) {
+        if (!(video.getUser().getId().equals(user.getId()) || user.isAdmin())) {
             throw new GeneralException(ErrorStatus._VIDEO_DELETE_PERMISSION_DENIED);
         }
 

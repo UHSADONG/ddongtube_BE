@@ -22,6 +22,7 @@ public class PlaylistCommandService {
     private final PlaylistRepository playlistRepository;
     private final UserCommandService userCommandService;
     private final S3Util s3Util;
+    private final UserQueryService userQueryService;
     @Value("${ddtube.playlist.code_length}")
     private Integer PLAYLIST_CODE_LENGTH;
     @Value("${ddtube.playlist.delete_hours}")
@@ -64,6 +65,7 @@ public class PlaylistCommandService {
     public void deletePlaylist(User user, String playlistCode) {
         Playlist playlist = playlistRepository.findFirstByCode(playlistCode)
             .orElseThrow(() -> new GeneralException(ErrorStatus._PLAYLIST_NOT_FOUND));
+        userQueryService.checkUserInPlaylist(user, playlist);
         if (!user.isAdmin()) {
             throw new GeneralException(ErrorStatus._PLAYLIST_DELETE_PERMISSION_DENIED);
         }
