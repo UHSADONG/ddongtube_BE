@@ -24,7 +24,7 @@ public class VideoController {
     private final VideoCommandService videoCommandService;
 
     @PostMapping("/{playlistCode}")
-    @Operation(summary = "재생목록에 영상 추가", description = "재생목록에 영상을 추가하는 기능입니다.")
+    @Operation(summary = "[0328] 재생목록에 영상 추가", description = "재생목록에 영상을 추가하는 기능입니다.")
     public ResponseEntity<ApiResponse<String>> addVideoToPlaylist(
         @CurrentUser User user,
         @PathVariable String playlistCode,
