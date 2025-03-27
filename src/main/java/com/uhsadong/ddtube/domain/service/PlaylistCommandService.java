@@ -3,6 +3,7 @@ package com.uhsadong.ddtube.domain.service;
 import com.uhsadong.ddtube.domain.dto.request.CreatePlaylistRequestDTO;
 import com.uhsadong.ddtube.domain.dto.response.CreatePlaylistResponseDTO;
 import com.uhsadong.ddtube.domain.entity.Playlist;
+import com.uhsadong.ddtube.domain.entity.User;
 import com.uhsadong.ddtube.domain.repository.PlaylistRepository;
 import com.uhsadong.ddtube.global.response.code.status.ErrorStatus;
 import com.uhsadong.ddtube.global.response.exception.GeneralException;
@@ -57,6 +58,16 @@ public class PlaylistCommandService {
             .playlistCode(playlist.getCode())
             .accessToken(accessToken)
             .build();
+    }
+
+    @Transactional
+    public void deletePlaylist(User user, String playlistCode) {
+        Playlist playlist = playlistRepository.findFirstByCode(playlistCode)
+            .orElseThrow(() -> new GeneralException(ErrorStatus._PLAYLIST_NOT_FOUND));
+        if (!user.isAdmin()) {
+            throw new GeneralException(ErrorStatus._PLAYLIST_DELETE_PERMISSION_DENIED);
+        }
+        playlistRepository.delete(playlist);
     }
 
 }
