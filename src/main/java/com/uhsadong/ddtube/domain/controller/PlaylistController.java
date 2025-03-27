@@ -42,7 +42,7 @@ public class PlaylistController {
     }
 
     @GetMapping("/meta/{playlistCode}")
-    @Operation(summary = "재생목록 메타정보 조회", description = "초대장에서 사용할 메타정보 조회 기능입니다.")
+    @Operation(summary = "[0328] 재생목록 메타정보 조회", description = "초대장에서 사용할 메타정보 조회 기능입니다. 초대장 이름, 썸네일 주소, 관리자, 참여자 목록을 반환합니다.")
     public ResponseEntity<ApiResponse<PlaylistMetaResponseDTO>> getPlaylistMeta(
         @CurrentUser User user,
         @PathVariable String playlistCode
@@ -53,7 +53,7 @@ public class PlaylistController {
     }
 
     @PostMapping()
-    @Operation(summary = "[0326] 재생목록 생성", description = "재생목록을 생성합니다. 생성하는 유저는 필수적으로 name과 password를 입력해야합니다. Jwt를 반환합니다.")
+    @Operation(summary = "[0328] 재생목록 생성", description = "재생목록을 생성합니다. 생성하는 유저는 필수적으로 name과 password를 입력해야합니다. \nJwt를 반환합니다. \n썸네일 주소는 선택사항으로, 빈 공백을 전송했을 때 default 이미지로 적용됩니다. \n이미지 업로드는 /playlist/thumbnail로 가능합니다. \n해당 썸네일 주소는 S3 파일 경로로 필터링되며 이상한 주소가 입력되었을 때에는 에러를 반환합니다.")
     public ResponseEntity<ApiResponse<CreatePlaylistResponseDTO>> createPlaylist(
         @RequestBody @Valid CreatePlaylistRequestDTO createPlaylistRequestDTO
     ) {
@@ -72,7 +72,7 @@ public class PlaylistController {
     }
 
     @PostMapping("/thumbnail")
-    @Operation(summary = "썸네일 업로드", description = "재생목록을 만들 때 썸네일을 입력받습니다.")
+    @Operation(summary = "썸네일 업로드", description = "재생목록을 만들 때 썸네일을 업로드합니다. 여기서 반환되는 전체 url을 재생목록을 생성할 때 넣어주시면 됩니다.")
     public ResponseEntity<ApiResponse<String>> uploadToS3(
         @RequestPart(value = "file") MultipartFile file
     ) {
