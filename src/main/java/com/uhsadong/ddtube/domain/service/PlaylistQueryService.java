@@ -13,7 +13,7 @@ public class PlaylistQueryService {
 
     public Playlist getPlaylistByCodeOrThrow(String code) {
         return playlistRepository.findFirstByCode(code)
-            .orElseThrow(IllegalArgumentException::new);
+            .orElseThrow(() -> new IllegalArgumentException("코드가 '" + code + "'인 플레이리스트를 찾을 수 없습니다"));
     }
 
 }

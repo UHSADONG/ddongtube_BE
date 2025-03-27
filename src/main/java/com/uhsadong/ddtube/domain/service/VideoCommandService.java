@@ -6,6 +6,7 @@ import com.uhsadong.ddtube.domain.entity.Playlist;
 import com.uhsadong.ddtube.domain.entity.Video;
 import com.uhsadong.ddtube.domain.repository.VideoRepository;
 import com.uhsadong.ddtube.global.util.YoutubeOEmbed;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +17,7 @@ public class VideoCommandService {
     private final VideoRepository videoRepository;
     private final PlaylistQueryService playlistQueryService;
 
+    @Transactional
     public void addVideoToPlaylist(
         String playlistCode, AddVideoToPlaylistRequestDTO requestDTO) {
 
