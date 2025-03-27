@@ -12,3 +12,5 @@ ddtube:
     delete_hours: 6
   user:
     code_length: 5
+  video:
+    code_length: 5

@@ -34,6 +34,9 @@ public class Video {
     private Playlist playlist;
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
+    @Column(nullable = false, length = 5, unique = true)
+    @Length(min = 5, max = 5)
+    private String code; // 5자리 AlphaNumeric
 
     @Length(max = 255)
     @Column(nullable = false, length = 255)
@@ -56,10 +59,11 @@ public class Video {
     @Column(updatable = false)
     private LocalDateTime createdAt;
 
-    public static Video toEntity(Playlist playlist, User user, String videoUrl, YoutubeOEmbedDTO youtubeInfo) {
+    public static Video toEntity(Playlist playlist, User user, String code, String videoUrl, YoutubeOEmbedDTO youtubeInfo) {
         return Video.builder()
             .playlist(playlist)
             .user(user)
+            .code(code)
             .title(youtubeInfo.title())
             .author_name(youtubeInfo.author_name())
             .url(videoUrl)

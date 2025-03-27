@@ -33,6 +33,9 @@ public enum ErrorStatus implements BaseErrorCode {
     _USER_NOT_FOUND(HttpStatus.BAD_REQUEST, "USER002", "해당 사용자를 찾을 수 없습니다."),
     _CREATOR_NOT_FOUND(HttpStatus.BAD_REQUEST, "USER003", "해당 플레이리스트의 생성자를 찾을 수 없습니다."),
 
+    // VIDEO
+    _VIDEO_NOT_FOUND(HttpStatus.BAD_REQUEST, "VIDEO001", "해당 비디오를 찾을 수 없습니다."),
+    _VIDEO_DELETE_PERMISSION_DENIED(HttpStatus.BAD_REQUEST, "VIDEO002", "해당 비디오를 삭제할 권한이 없습니다."),
     ;
 
     private final HttpStatus httpStatus;
