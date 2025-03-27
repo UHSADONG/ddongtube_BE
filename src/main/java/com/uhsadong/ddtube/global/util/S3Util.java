@@ -9,12 +9,14 @@ import com.uhsadong.ddtube.global.response.exception.GeneralException;
 import java.io.IOException;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class S3Util {
 
     private final AmazonS3 amazonS3;
@@ -30,6 +32,9 @@ public class S3Util {
         ObjectMetadata metadata = new ObjectMetadata();
         metadata.setContentLength(file.getSize());
         metadata.setContentType(file.getContentType());
+        metadata.setContentDisposition("inline");
+        log.info("Content-Type: " + file.getContentType());
+
 
         try {
             PutObjectRequest putObjectRequest = new PutObjectRequest(
@@ -51,7 +56,7 @@ public class S3Util {
     private String buildFileName(String originalFilename) {
         String uuid = UUID.randomUUID().toString();
         String ext = originalFilename.substring(originalFilename.lastIndexOf('.'));
-        return String.format("/%s%s", uuid, ext); // 예: images/uuid.jpg
+        return String.format("%s%s", uuid, ext); // 예: images/uuid.jpg
     }
 
     public boolean isS3Url(String url){
