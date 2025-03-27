@@ -2,11 +2,15 @@ package com.uhsadong.ddtube.domain.controller;
 
 import com.uhsadong.ddtube.domain.dto.request.CreatePlaylistRequestDTO;
 import com.uhsadong.ddtube.domain.dto.response.CreatePlaylistResponseDTO;
+import com.uhsadong.ddtube.domain.entity.User;
 import com.uhsadong.ddtube.domain.service.PlaylistCommandService;
 import com.uhsadong.ddtube.global.response.ApiResponse;
+import com.uhsadong.ddtube.global.security.CurrentUser;
+import com.uhsadong.ddtube.global.util.S3Util;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,7 +18,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
@@ -22,10 +28,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class PlaylistController {
 
     private final PlaylistCommandService playlistCommandService;
+    private final S3Util s3Util;
 
     @GetMapping("/{playlistCode}")
     @Operation(summary = "재생목록 조회", description = "재생목록 조회 기능입니다.")
     public ResponseEntity<ApiResponse<String>> getPlaylist(
+        @CurrentUser User user,
         @PathVariable String playlistCode
     ) {
         return ResponseEntity.ok(ApiResponse.onSuccess("Hello, World!"));
@@ -44,8 +52,19 @@ public class PlaylistController {
     @DeleteMapping("/{playlistCode}")
     @Operation(summary = "재생목록 삭제", description = "재생목록 삭제 기능입니다.")
     public ResponseEntity<ApiResponse<String>> deletePlaylist(
+        @CurrentUser User user,
         @PathVariable String playlistCode
     ) {
         return ResponseEntity.ok(ApiResponse.onSuccess("Hello, World!"));
+    }
+
+    @PostMapping("/thumbnail")
+    @Operation(summary = "썸네일 업로드", description = "재생목록을 만들 때 썸네일을 입력받습니다.")
+    public ResponseEntity<ApiResponse<String>> uploadToS3(
+        @RequestPart(value = "file") MultipartFile file
+    ) {
+        return ResponseEntity.ok(ApiResponse.onSuccess(
+            s3Util.upload(file)
+        ));
     }
 }

@@ -7,5 +7,4 @@ public record CreatePlaylistResponseDTO(
     String playlistCode,
     String accessToken
 ) {
-
 }
