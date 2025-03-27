@@ -21,12 +21,12 @@ public class UserController {
 
     @GetMapping("/{playlistCode}")
     @Operation(summary = "[0327] 사용자 로그인/회원가입", description = "사용자 정보를 추가합니다. 이미 있는 계정이라면 비밀번호를 확인한 뒤 데이터를 추가합니다. JWT를 반환합니다.")
-    public ResponseEntity<String> getPlaylist(
+    public ResponseEntity<String> signIn(
         @PathVariable String playlistCode,
         @RequestBody @Valid CreateUserRequestDTO createUserRequestDTO
     ) {
         return ResponseEntity.ok(
-            userCommandService.createPlaylistViewer(playlistCode, createUserRequestDTO));
+            userCommandService.getJwtTokenBySignInUp(playlistCode, createUserRequestDTO));
     }
 
 }

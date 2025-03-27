@@ -7,8 +7,10 @@ import com.uhsadong.ddtube.domain.repository.UserRepository;
 import com.uhsadong.ddtube.global.util.IdGenerator;
 import com.uhsadong.ddtube.global.util.JwtUtil;
 import jakarta.transaction.Transactional;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -18,6 +20,7 @@ public class UserCommandService {
     private final UserRepository userRepository;
     private final PlaylistQueryService playlistQueryService;
     private final JwtUtil jwtUtil;
+    private final PasswordEncoder passwordEncoder;
     @Value("${ddtube.user.code_length}")
     private Integer USER_CODE_LENGTH;
 
@@ -25,18 +28,49 @@ public class UserCommandService {
     public String createPlaylistCreator(Playlist playlist, String name, String password) {
         String code = IdGenerator.generateShortId(USER_CODE_LENGTH);
         User user = userRepository.save(
-            User.toEntity(playlist, code, name, password, true)
+            User.toEntity(playlist, code, name, passwordEncoder.encode(password), true)
         );
         return jwtUtil.generateAccessToken(user.getCode());
     }
 
+    /**
+     * 존재하는 사용자면 로그인 절차 / 존재하지 않는 사용자면 회원가입 절차
+     * <p>따라서 회원가입 시 이름 중복 체크 안해도 됨</p>
+     */
     @Transactional
-    public String createPlaylistViewer(String playlistCode, CreateUserRequestDTO requestDTO) {
+    public String getJwtTokenBySignInUp(String playlistCode, CreateUserRequestDTO requestDTO) {
+        Optional<User> optionalUser = userRepository.findFirstByPlaylistCodeAndName(playlistCode,
+            requestDTO.name());
+        if (optionalUser.isPresent()) { // 사용자 데이터가 있으면 로그인
+            return signIn(optionalUser.get(), requestDTO.password());
+        }
+        // 없으면 회원가입
+        return signUp(playlistCode, requestDTO);
+    }
+
+    /**
+     * 사용자 데이터가 존재할 때에는 로그인을 시도한다.
+     */
+    private String signIn(User user, String password) {
+        // password는 인코딩 전, user.getPassword는 인코딩 후
+        if (passwordEncoder.matches(password, user.getPassword())) {
+            return jwtUtil.generateAccessToken(user.getCode());
+        }
+        throw new IllegalArgumentException("이미 사용자가 존재하며, 비밀번호가 일치하지 않습니다");
+    }
+
+    /**
+     * 사용자 데이터가 존재하지 않을 때에는 회원가입을 시도한다.
+     */
+    private String signUp(String playlistCode, CreateUserRequestDTO requestDTO) {
         Playlist playlist = playlistQueryService.getPlaylistByCodeOrThrow(playlistCode);
         String code = IdGenerator.generateShortId(USER_CODE_LENGTH);
         User user = userRepository.save(
-            User.toEntity(playlist, code, requestDTO.name(), requestDTO.password(), false)
+            User.toEntity(playlist, code, requestDTO.name(),
+                passwordEncoder.encode(requestDTO.password()), false)
         );
         return jwtUtil.generateAccessToken(user.getCode());
     }
+
+
 }
