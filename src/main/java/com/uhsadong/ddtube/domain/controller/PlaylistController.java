@@ -63,12 +63,13 @@ public class PlaylistController {
     }
 
     @DeleteMapping("/{playlistCode}")
-    @Operation(summary = "재생목록 삭제", description = "재생목록 삭제 기능입니다.")
+    @Operation(summary = "[0328] 재생목록 삭제", description = "재생목록 삭제 기능입니다. 관리자만 삭제 가능합니다.")
     public ResponseEntity<ApiResponse<String>> deletePlaylist(
         @CurrentUser User user,
         @PathVariable String playlistCode
     ) {
-        return ResponseEntity.ok(ApiResponse.onSuccess("Hello, World!"));
+        playlistCommandService.deletePlaylist(user, playlistCode);
+        return ResponseEntity.ok(ApiResponse.onSuccess("삭제 완료"));
     }
 
     @PostMapping("/thumbnail")
