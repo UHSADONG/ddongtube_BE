@@ -3,6 +3,7 @@ package com.uhsadong.ddtube.domain.controller;
 import com.uhsadong.ddtube.domain.dto.request.CreatePlaylistRequestDTO;
 import com.uhsadong.ddtube.domain.dto.response.CreatePlaylistResponseDTO;
 import com.uhsadong.ddtube.domain.service.PlaylistCommandService;
+import com.uhsadong.ddtube.global.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,27 +25,27 @@ public class PlaylistController {
 
     @GetMapping("/{playlistCode}")
     @Operation(summary = "재생목록 조회", description = "재생목록 조회 기능입니다.")
-    public ResponseEntity<String> getPlaylist(
+    public ResponseEntity<ApiResponse<String>> getPlaylist(
         @PathVariable Long playlistCode
     ) {
-        return ResponseEntity.ok("Hello, World!");
+        return ResponseEntity.ok(ApiResponse.onSuccess("Hello, World!"));
     }
 
     @PostMapping()
     @Operation(summary = "[0326] 재생목록 생성", description = "재생목록을 생성합니다. 생성하는 유저는 필수적으로 name과 password를 입력해야합니다. Jwt를 반환합니다.")
-    public ResponseEntity<CreatePlaylistResponseDTO> createPlaylist(
+    public ResponseEntity<ApiResponse<CreatePlaylistResponseDTO>> createPlaylist(
         @RequestBody @Valid CreatePlaylistRequestDTO createPlaylistRequestDTO
     ) {
-        return ResponseEntity.ok(
+        return ResponseEntity.ok(ApiResponse.onSuccess(
             playlistCommandService.createPlaylist(createPlaylistRequestDTO)
-        );
+        ));
     }
 
     @DeleteMapping("/{playlistCode}")
     @Operation(summary = "재생목록 삭제", description = "재생목록 삭제 기능입니다.")
-    public ResponseEntity<String> deletePlaylist(
+    public ResponseEntity<ApiResponse<String>> deletePlaylist(
         @PathVariable Long playlistCode
     ) {
-        return ResponseEntity.ok("Hello, World!");
+        return ResponseEntity.ok(ApiResponse.onSuccess("Hello, World!"));
     }
 }

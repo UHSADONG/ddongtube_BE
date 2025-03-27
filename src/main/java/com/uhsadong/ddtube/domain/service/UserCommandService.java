@@ -4,6 +4,8 @@ import com.uhsadong.ddtube.domain.dto.request.CreateUserRequestDTO;
 import com.uhsadong.ddtube.domain.entity.Playlist;
 import com.uhsadong.ddtube.domain.entity.User;
 import com.uhsadong.ddtube.domain.repository.UserRepository;
+import com.uhsadong.ddtube.global.response.code.status.ErrorStatus;
+import com.uhsadong.ddtube.global.response.exception.GeneralException;
 import com.uhsadong.ddtube.global.util.IdGenerator;
 import com.uhsadong.ddtube.global.util.JwtUtil;
 import jakarta.transaction.Transactional;
@@ -56,7 +58,7 @@ public class UserCommandService {
         if (passwordEncoder.matches(password, user.getPassword())) {
             return jwtUtil.generateAccessToken(user.getCode());
         }
-        throw new IllegalArgumentException("이미 사용자가 존재하며, 비밀번호가 일치하지 않습니다");
+        throw new GeneralException(ErrorStatus._USER_ALREADY_EXISTS);
     }
 
     /**
