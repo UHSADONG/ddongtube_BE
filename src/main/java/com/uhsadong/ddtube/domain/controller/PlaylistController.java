@@ -34,7 +34,7 @@ public class PlaylistController {
     private final PlaylistQueryService playlistQueryService;
 
     @GetMapping("/{playlistCode}")
-    @Operation(summary = "재생목록 조회", description = "재생목록 조회 기능입니다.")
+    @Operation(summary = "[0328] 재생목록 조회", description = "재생목록 조회 기능입니다.")
     public ResponseEntity<ApiResponse<PlaylistDetailResponseDTO>> getPlaylist(
         @CurrentUser User user,
         @PathVariable String playlistCode

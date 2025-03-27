@@ -1,7 +1,9 @@
 package com.uhsadong.ddtube.global.util;
 
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.uhsadong.ddtube.global.response.code.status.ErrorStatus;
 import com.uhsadong.ddtube.global.response.exception.GeneralException;
 import java.io.IOException;
@@ -30,7 +32,15 @@ public class S3Util {
         metadata.setContentType(file.getContentType());
 
         try {
-            amazonS3.putObject(bucketName, fileName, file.getInputStream(), metadata);
+            PutObjectRequest putObjectRequest = new PutObjectRequest(
+                bucketName,
+                fileName,
+                file.getInputStream(),
+                metadata
+            ).withCannedAcl(CannedAccessControlList.PublicRead);
+
+            amazonS3.putObject(putObjectRequest);
+
         } catch (IOException e) {
             throw new GeneralException(ErrorStatus._FILE_UPLOAD_ERROR);
         }
