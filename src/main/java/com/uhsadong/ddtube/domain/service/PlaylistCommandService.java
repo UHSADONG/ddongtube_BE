@@ -48,7 +48,7 @@ public class PlaylistCommandService {
             ? defaultThumbnailUrl : requestDTO.thumbnailUrl();
 
         Playlist playlist = playlistRepository.save(
-            Playlist.toEntity(code, requestDTO.playlistTitle(), thumbnailUrl, willDeleteAt)
+            Playlist.toEntity(code, requestDTO.playlistTitle(), requestDTO.playlistDescription(), thumbnailUrl, willDeleteAt)
         );
 
         String accessToken = userCommandService.createPlaylistCreator(

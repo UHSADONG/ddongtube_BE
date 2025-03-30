@@ -9,6 +9,9 @@ public record CreatePlaylistRequestDTO(
     String userPassword, // 만든사람 비밀번호
     @Length(min = 1, max = 100, message = "재생목록 제목은 1자 이상 100자 이하여야 합니다.")
     String playlistTitle, // 재생목록 제목
+    @Length(max = 255, message = "재생목록 설명은 255자 이하여야 합니다.")
+    String playlistDescription, // 재생목록 설명
+    @Length(max = 255, message = "썸네일 URL은 255자 이하여야 합니다.")
     String thumbnailUrl // 썸네일 URL
 ) {
 
