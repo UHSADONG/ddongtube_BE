@@ -26,6 +26,11 @@ public enum ErrorStatus implements BaseErrorCode {
     _S3_IO_EXCEPTION(HttpStatus.BAD_REQUEST, "S3003", "S3 IO 예외가 발생했습니다."),
     _S3_COMMUNICATION_EXCEPTION(HttpStatus.BAD_REQUEST, "S3004", "S3 통신 중 예외가 발생했습니다."),
 
+    // SSE
+    _SSE_CONNECTION_ERROR(HttpStatus.BAD_REQUEST, "SSE001", "SSE 연결 중 에러가 발생했습니다."),
+    _SSE_SEND_ERROR(HttpStatus.BAD_REQUEST, "SSE002", "SSE 전송 중 에러가 발생했습니다."),
+    _SSE_STATUS_ERROR(HttpStatus.BAD_REQUEST, "SSE003", "SSE 상태 에러가 발생했습니다."),
+
 
     // PLAYLIST
     _PLAYLIST_NOT_FOUND(HttpStatus.BAD_REQUEST, "PLAYLIST001", "해당 플레이리스트를 찾을 수 없습니다."),

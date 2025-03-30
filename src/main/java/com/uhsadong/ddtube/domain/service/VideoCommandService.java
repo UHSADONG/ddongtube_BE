@@ -8,6 +8,8 @@ import com.uhsadong.ddtube.domain.entity.Video;
 import com.uhsadong.ddtube.domain.repository.VideoRepository;
 import com.uhsadong.ddtube.global.response.code.status.ErrorStatus;
 import com.uhsadong.ddtube.global.response.exception.GeneralException;
+import com.uhsadong.ddtube.global.sse.SseEmitters;
+import com.uhsadong.ddtube.global.sse.SseStatus;
 import com.uhsadong.ddtube.global.util.IdGenerator;
 import com.uhsadong.ddtube.global.util.YoutubeOEmbed;
 import jakarta.transaction.Transactional;
@@ -24,6 +26,7 @@ public class VideoCommandService {
     private final VideoRepository videoRepository;
     private final PlaylistQueryService playlistQueryService;
     private final UserQueryService userQueryService;
+    private final SseEmitters sseEmitters;
     @Value("${ddtube.video.code_length}")
     private int VIDEO_CODE_LENGTH;
     @Value("${ddtube.playlist.priority_step}")
@@ -41,10 +44,12 @@ public class VideoCommandService {
             .findFirstByPlaylistCodeOrderByPriorityDesc(playlistCode)
             .map(Video::getPriority)
             .orElse(0L);
-        videoRepository.save(
+        Video video = videoRepository.save(
             Video.toEntity(playlist, user, code, requestDTO.videoUrl(), youtubeOEmbedDTO,
                 priority + PRIORITY_STEP)
         );
+        sseEmitters.sendVideoEventToClients(playlistCode, video, SseStatus.ADD);
+
     }
 
     @Transactional
@@ -60,6 +65,7 @@ public class VideoCommandService {
         }
 
         videoRepository.delete(video);
+        sseEmitters.sendVideoEventToClients(playlistCode, video, SseStatus.DELETE);
     }
 
 }
