@@ -36,6 +36,8 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
             ))
             .findFirst()
             .orElseThrow(() -> new RuntimeException("ConstraintViolationException 추출 도중 에러 발생"));
+
+        log.error(errorMessage);
         return handleExceptionInternalConstraint(e, HttpHeaders.EMPTY, request, errorMessage);
     }
 
@@ -57,6 +59,7 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
                         + newErrorMessage);
             });
 
+        log.error(errors.toString());
         return handleExceptionInternalArgs(e, HttpHeaders.EMPTY,
             ErrorStatus.valueOf("_BAD_REQUEST"), request, errors);
     }
@@ -65,6 +68,7 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
     @ExceptionHandler
     public ResponseEntity<Object> exception(Exception e, WebRequest request) {
 
+        log.error(e.getMessage());
         return handleExceptionInternalFalse(e, ErrorStatus._INTERNAL_SERVER_ERROR,
             HttpHeaders.EMPTY, ErrorStatus._INTERNAL_SERVER_ERROR.getHttpStatus(), request,
             e.getMessage());
@@ -76,6 +80,7 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
         HttpServletRequest request) {
 
         ErrorReasonDto errorReasonHttpStatus = generalException.getErrorReasonHttpStatus();
+        log.error(errorReasonHttpStatus.getMessage());
         return handleExceptionInternal(generalException, errorReasonHttpStatus, null, request);
     }
 
@@ -85,6 +90,7 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
         ApiResponse<Object> body = ApiResponse.onFailure(reason.getCode(), reason.getMessage(),
             null);
         WebRequest webRequest = new ServletWebRequest(request);
+        log.error(reason.getMessage());
         return super.handleExceptionInternal(
             e,
             body,
@@ -101,6 +107,7 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
         HttpHeaders headers, HttpStatus status, WebRequest request, String errorPoint) {
         ApiResponse<Object> body = ApiResponse.onFailure(errorCommonStatus.getCode(),
             errorCommonStatus.getMessage(), errorPoint);
+        log.error(errorPoint);
         return super.handleExceptionInternal(
             e,
             body,
@@ -116,6 +123,7 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
         WebRequest request, Map<String, String> errorArgs) {
         ApiResponse<Object> body = ApiResponse.onFailure(errorCommonStatus.getCode(),
             errorCommonStatus.getMessage(), errorArgs);
+        log.error(errorArgs.toString());
         return super.handleExceptionInternal(
             e,
             body,
@@ -130,6 +138,7 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
         HttpHeaders headers, WebRequest request, String message) {
         ApiResponse<Object> body = ApiResponse.onFailure(ErrorStatus._BAD_REQUEST.getCode(),
             message, null);
+        log.error(message);
         return super.handleExceptionInternal(
             e,
             body,
