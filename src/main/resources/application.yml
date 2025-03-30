@@ -10,6 +10,7 @@ ddtube:
   playlist:
     code_length: 5
     delete_hours: 6
+    priority_step: 100_000_000_000_000
   user:
     code_length: 5
   video:

@@ -26,6 +26,8 @@ public class VideoCommandService {
     private final UserQueryService userQueryService;
     @Value("${ddtube.video.code_length}")
     private int VIDEO_CODE_LENGTH;
+    @Value("${ddtube.playlist.priority_step}")
+    private long PRIORITY_STEP;
 
     @Transactional
     public void addVideoToPlaylist(
@@ -35,8 +37,13 @@ public class VideoCommandService {
 
         String code = IdGenerator.generateShortId(VIDEO_CODE_LENGTH);
         YoutubeOEmbedDTO youtubeOEmbedDTO = YoutubeOEmbed.getVideoInfo(requestDTO.videoUrl());
+        Long priority = videoRepository
+            .findFirstByPlaylistCodeOrderByPriorityDesc(playlistCode)
+            .map(Video::getPriority)
+            .orElse(0L);
         videoRepository.save(
-            Video.toEntity(playlist, user, code, requestDTO.videoUrl(), youtubeOEmbedDTO)
+            Video.toEntity(playlist, user, code, requestDTO.videoUrl(), youtubeOEmbedDTO,
+                priority + PRIORITY_STEP)
         );
     }
 
