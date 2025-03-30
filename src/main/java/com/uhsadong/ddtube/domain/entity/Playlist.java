@@ -35,6 +35,10 @@ public class Playlist {
     @Length(min = 1, max = 100)
     private String title;
 
+    @Column(nullable = true, length = 255)
+    @Length(max = 255)
+    private String description;
+
     @Column(nullable = true)
     private String thumbnailUrl;
 
@@ -46,10 +50,11 @@ public class Playlist {
     private LocalDateTime createdAt;
 
 
-    public static Playlist toEntity(String code, String title, String thumbnailUrl ,LocalDateTime willDeleteAt) {
+    public static Playlist toEntity(String code, String title, String description, String thumbnailUrl ,LocalDateTime willDeleteAt) {
         return Playlist.builder()
             .code(code)
             .title(title)
+            .description(description)
             .thumbnailUrl(thumbnailUrl)
             .willDeleteAt(willDeleteAt)
             .build();
