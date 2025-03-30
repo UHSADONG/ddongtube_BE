@@ -1,9 +1,5 @@
 package com.uhsadong.ddtube.global.util;
 
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.CannedAccessControlList;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.uhsadong.ddtube.global.response.code.status.ErrorStatus;
 import com.uhsadong.ddtube.global.response.exception.GeneralException;
 import java.io.IOException;
@@ -13,13 +9,18 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.PutObjectResponse;
+import software.amazon.awssdk.services.s3.model.S3Exception;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class S3Util {
 
-    private final AmazonS3 amazonS3;
+    private final S3Client s3Client;
 
     @Value("${aws.s3.bucket}")
     private String bucketName;
@@ -28,26 +29,34 @@ public class S3Util {
     private String region;
 
     public String upload(MultipartFile file) {
+
         String fileName = buildFileName(file.getOriginalFilename());
-        ObjectMetadata metadata = new ObjectMetadata();
-        metadata.setContentLength(file.getSize());
-        metadata.setContentType(file.getContentType());
+        String contentType = file.getContentType();
 
         try {
-            PutObjectRequest putObjectRequest = new PutObjectRequest(
-                bucketName,
-                fileName,
-                file.getInputStream(),
-                metadata
-            ).withCannedAcl(CannedAccessControlList.PublicRead);
+            PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+                .bucket(bucketName)
+                .key(fileName)
+                .contentType(contentType)
+                .contentLength(file.getSize())
+                .build();
 
-            amazonS3.putObject(putObjectRequest);
+            PutObjectResponse response = s3Client.putObject(putObjectRequest,
+                RequestBody.fromBytes(file.getBytes()));
 
-        } catch (IOException e) {
-            throw new GeneralException(ErrorStatus._FILE_UPLOAD_ERROR);
+            if (response.sdkHttpResponse().statusText().orElse("FAIL").equals("OK")) {
+
+            }
+        } catch (IOException ie) {
+            log.error("파일을 읽어들이는데 에러가 발생했습니다.");
+            log.error(ie.getMessage());
+            throw new GeneralException(ErrorStatus._S3_IO_EXCEPTION);
+        } catch (S3Exception | IllegalStateException ae) {
+            log.error("AWS와 통신에 문제가 발생했습니다.");
+            log.error(ae.getMessage());
+            throw new GeneralException(ErrorStatus._S3_COMMUNICATION_EXCEPTION);
         }
-
-        return amazonS3.getUrl(bucketName, fileName).toString(); // 업로드된 파일의 URL 반환
+        return String.format("https://%s.s3.%s.amazonaws.com/%s", bucketName, region, fileName);
     }
 
     private String buildFileName(String originalFilename) {
@@ -57,9 +66,9 @@ public class S3Util {
     }
 
     public boolean isS3Url(String url) {
-        String s3Prefix1 = String.format("https://%s.s3.%s.amazonaws.com/", bucketName, region);
+        String s3Prefix = String.format("https://%s.s3.%s.amazonaws.com/", bucketName, region);
 
-        return url.startsWith(s3Prefix1);
+        return url.startsWith(s3Prefix);
     }
 
 }

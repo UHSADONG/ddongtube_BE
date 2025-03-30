@@ -23,6 +23,9 @@ public enum ErrorStatus implements BaseErrorCode {
     // S3
     _FILE_UPLOAD_ERROR(HttpStatus.BAD_REQUEST, "S3001", "파일 업로드에 실패했습니다."),
     _INVALID_THUMBNAIL_URL(HttpStatus.BAD_REQUEST, "S3002", "유효하지 않은 썸네일 URL입니다."),
+    _S3_IO_EXCEPTION(HttpStatus.BAD_REQUEST, "S3003", "S3 IO 예외가 발생했습니다."),
+    _S3_COMMUNICATION_EXCEPTION(HttpStatus.BAD_REQUEST, "S3004", "S3 통신 중 예외가 발생했습니다."),
+
 
     // PLAYLIST
     _PLAYLIST_NOT_FOUND(HttpStatus.BAD_REQUEST, "PLAYLIST001", "해당 플레이리스트를 찾을 수 없습니다."),
