@@ -8,7 +8,9 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -24,6 +26,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @NoArgsConstructor
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
+@Table(indexes = @Index(name = "idx_code", columnList = "code"))
 public class Video {
 
     @Id
@@ -59,7 +62,8 @@ public class Video {
     @Column(updatable = false)
     private LocalDateTime createdAt;
 
-    public static Video toEntity(Playlist playlist, User user, String code, String videoUrl, YoutubeOEmbedDTO youtubeInfo) {
+    public static Video toEntity(Playlist playlist, User user, String code, String videoUrl,
+        YoutubeOEmbedDTO youtubeInfo) {
         return Video.builder()
             .playlist(playlist)
             .user(user)
