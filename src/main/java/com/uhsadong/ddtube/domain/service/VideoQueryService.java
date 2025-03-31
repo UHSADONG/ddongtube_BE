@@ -20,25 +20,26 @@ public class VideoQueryService {
 
     public List<VideoDetailResponseDTO> getVideoDetailListByPlaylistCode(String playlistCode) {
         List<Video> videoList = getVideoListByPlaylistCode(playlistCode);
-        return videoList.stream()
-            .map(video -> VideoDetailResponseDTO.builder()
-                .user(UserDetailResponseDTO.builder()
-                    .name(video.getUser().getName())
-                    .code(video.getUser().getCode())
-                    .isAdmin(video.getUser().isAdmin())
-                    .build())
-                .code(video.getCode())
-                .title(video.getTitle())
-                .authorName(video.getAuthorName())
-                .url(video.getUrl())
-                .height(video.getHeight())
-                .width(video.getWidth())
-                .thumbnailUrl(video.getThumbnailUrl())
-                .thumbnailHeight(video.getThumbnailHeight())
-                .thumbnailWidth(video.getThumbnailWidth())
-                .createdAt(video.getCreatedAt())
-                .build()
-            )
-            .toList();
+        return videoList.stream().map(this::convertToVideoDetailResponseDTO).toList();
+    }
+
+    public VideoDetailResponseDTO convertToVideoDetailResponseDTO(Video video) {
+        return VideoDetailResponseDTO.builder()
+            .user(UserDetailResponseDTO.builder()
+                .name(video.getUser().getName())
+                .code(video.getUser().getCode())
+                .isAdmin(video.getUser().isAdmin())
+                .build())
+            .code(video.getCode())
+            .title(video.getTitle())
+            .authorName(video.getAuthorName())
+            .url(video.getUrl())
+            .height(video.getHeight())
+            .width(video.getWidth())
+            .thumbnailUrl(video.getThumbnailUrl())
+            .thumbnailHeight(video.getThumbnailHeight())
+            .thumbnailWidth(video.getThumbnailWidth())
+            .createdAt(video.getCreatedAt())
+            .build();
     }
 }
