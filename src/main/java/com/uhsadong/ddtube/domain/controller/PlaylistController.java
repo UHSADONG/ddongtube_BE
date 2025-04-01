@@ -4,6 +4,7 @@ import com.uhsadong.ddtube.domain.dto.request.CreatePlaylistRequestDTO;
 import com.uhsadong.ddtube.domain.dto.response.CreatePlaylistResponseDTO;
 import com.uhsadong.ddtube.domain.dto.response.PlaylistDetailResponseDTO;
 import com.uhsadong.ddtube.domain.dto.response.PlaylistMetaResponseDTO;
+import com.uhsadong.ddtube.domain.dto.response.PlaylistPublicMetaResponseDTO;
 import com.uhsadong.ddtube.domain.entity.User;
 import com.uhsadong.ddtube.domain.service.PlaylistCommandService;
 import com.uhsadong.ddtube.domain.service.PlaylistQueryService;
@@ -41,6 +42,16 @@ public class PlaylistController {
     ) {
         return ResponseEntity.ok(ApiResponse.onSuccess(
             playlistQueryService.getPlaylistDetail(user, playlistCode)
+        ));
+    }
+
+    @GetMapping("/meta/{playlistCode}/public")
+    @Operation(summary = "[0328] 재생목록 메타정보 조회 (JWT 불필요)", description = "초대장에서 사용할 메타정보 조회 기능입니다. 초대장 이름, 썸네일 주소, 초대장 설명을 반환합니다.")
+    public ResponseEntity<ApiResponse<PlaylistPublicMetaResponseDTO>> getPlaylistPublicMeta(
+        @PathVariable String playlistCode
+    ) {
+        return ResponseEntity.ok(ApiResponse.onSuccess(
+            playlistQueryService.getPlaylistPublicMeteInformation(playlistCode)
         ));
     }
 
