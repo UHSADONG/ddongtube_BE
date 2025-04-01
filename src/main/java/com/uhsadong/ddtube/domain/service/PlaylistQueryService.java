@@ -2,6 +2,7 @@ package com.uhsadong.ddtube.domain.service;
 
 import com.uhsadong.ddtube.domain.dto.response.PlaylistDetailResponseDTO;
 import com.uhsadong.ddtube.domain.dto.response.PlaylistMetaResponseDTO;
+import com.uhsadong.ddtube.domain.dto.response.PlaylistPublicMetaResponseDTO;
 import com.uhsadong.ddtube.domain.dto.response.VideoDetailResponseDTO;
 import com.uhsadong.ddtube.domain.entity.Playlist;
 import com.uhsadong.ddtube.domain.entity.User;
@@ -23,6 +24,15 @@ public class PlaylistQueryService {
     public Playlist getPlaylistByCodeOrThrow(String code) {
         return playlistRepository.findFirstByCode(code)
             .orElseThrow(() -> new GeneralException(ErrorStatus._PLAYLIST_NOT_FOUND));
+    }
+
+    public PlaylistPublicMetaResponseDTO getPlaylistPublicMeteInformation(String playlistCode) {
+        Playlist playlist = getPlaylistByCodeOrThrow(playlistCode);
+        return PlaylistPublicMetaResponseDTO.builder()
+            .title(playlist.getTitle())
+            .thumbnailUrl(playlist.getThumbnailUrl())
+            .description(playlist.getDescription())
+            .build();
     }
 
     public PlaylistMetaResponseDTO getPlaylistMetaInformation(User user, String playlistCode) {
