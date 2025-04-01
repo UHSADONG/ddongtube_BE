@@ -26,7 +26,7 @@ public class PlaylistQueryService {
             .orElseThrow(() -> new GeneralException(ErrorStatus._PLAYLIST_NOT_FOUND));
     }
 
-    public PlaylistPublicMetaResponseDTO getPlaylistPublicMeteInformation(String playlistCode) {
+    public PlaylistPublicMetaResponseDTO getPlaylistPublicMetaInformation(String playlistCode) {
         Playlist playlist = getPlaylistByCodeOrThrow(playlistCode);
         return PlaylistPublicMetaResponseDTO.builder()
             .title(playlist.getTitle())
@@ -66,8 +66,16 @@ public class PlaylistQueryService {
 
         List<VideoDetailResponseDTO> videoResponseList = videoQueryService.getVideoDetailListByPlaylistCode(
             playlistCode);
+
+        // 현재 실행중인 비디오 코드를 반환함
+        String nowPlayingVideoCode =
+            playlist.getNowPlayVideo() == null
+                ? null
+                : playlist.getNowPlayVideo().getCode();
+
         return PlaylistDetailResponseDTO.builder()
             .title(playlist.getTitle())
+            .nowPlayingVideoCode(nowPlayingVideoCode)
             .videoList(videoResponseList)
             .build();
     }

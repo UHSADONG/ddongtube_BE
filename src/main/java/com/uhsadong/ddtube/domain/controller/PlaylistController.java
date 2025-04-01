@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -51,7 +52,7 @@ public class PlaylistController {
         @PathVariable String playlistCode
     ) {
         return ResponseEntity.ok(ApiResponse.onSuccess(
-            playlistQueryService.getPlaylistPublicMeteInformation(playlistCode)
+            playlistQueryService.getPlaylistPublicMetaInformation(playlistCode)
         ));
     }
 
@@ -97,11 +98,11 @@ public class PlaylistController {
     }
 
     @PostMapping("/{playlistCode}/now-playing")
-    @Operation(summary = "[0328] 현재 재생 중인 영상 설정", description = "현재 재생중인 영상을 바꿉니다. TODO: 관리자가 아니라면 현재 재생중인 영상보다 우선순위가 다음으로 높은 영상으로만 바꿀 수 있습니다.")
+    @Operation(summary = "현재 재생 중인 영상 설정", description = "현재 재생중인 영상을 바꿉니다. TODO: 관리자가 아니라면 현재 재생중인 영상보다 우선순위가 다음으로 높은 영상으로만 바꿀 수 있습니다.")
     public ResponseEntity<ApiResponse<String>> setNowPlaying(
         @CurrentUser User user,
         @PathVariable String playlistCode,
-        @RequestBody String videoCode
+        @RequestParam String videoCode
     ) {
         playlistCommandService.setNowPlayingVideo(user, playlistCode, videoCode);
         return ResponseEntity.ok(ApiResponse.onSuccess("변경 완료"));

@@ -6,6 +6,7 @@ import lombok.Builder;
 @Builder
 public record PlaylistDetailResponseDTO(
     String title,
+    String nowPlayingVideoCode,
     List<VideoDetailResponseDTO> videoList
 ) {
 

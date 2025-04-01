@@ -87,7 +87,7 @@ public class PlaylistCommandService {
         if(playlist.getNowPlayVideo() != null && video.getId().equals(playlist.getNowPlayVideo().getId())){
             return;
         }
-        if(playlist.getId().equals(video.getPlaylist().getId())) {
+        if(!playlist.getId().equals(video.getPlaylist().getId())) {
             throw new GeneralException(ErrorStatus._VIDEO_NOT_IN_PLAYLIST);
         }
         playlist.setNowPlayVideo(video);
