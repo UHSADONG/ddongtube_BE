@@ -1,6 +1,7 @@
 package com.uhsadong.ddtube.domain.controller;
 
 import com.uhsadong.ddtube.domain.dto.request.CreateUserRequestDTO;
+import com.uhsadong.ddtube.domain.dto.response.CreateUserResponseDTO;
 import com.uhsadong.ddtube.domain.service.UserCommandService;
 import com.uhsadong.ddtube.global.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -22,7 +23,7 @@ public class UserController {
 
     @PostMapping("/{playlistCode}")
     @Operation(summary = "[0328] 사용자 로그인/회원가입", description = "사용자 정보를 추가합니다. 이미 있는 계정이라면 비밀번호를 확인한 뒤 데이터를 추가합니다. JWT를 반환합니다.")
-    public ResponseEntity<ApiResponse<String>> signIn(
+    public ResponseEntity<ApiResponse<CreateUserResponseDTO>> signIn(
         @PathVariable String playlistCode,
         @RequestBody @Valid CreateUserRequestDTO createUserRequestDTO
     ) {
