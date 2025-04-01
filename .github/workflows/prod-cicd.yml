@@ -51,6 +51,7 @@ jobs:
         uses: gradle/gradle-build-action@v2
         with:
           arguments: clean build -x test
+          cache-disabled: true
 
       - name: Login to Amazon ECR
         id: login-ecr
