@@ -19,7 +19,7 @@ public class SseController {
 
     private final SseEmitters sseEmitters;
     @Value("${ddtube.sse.time_out}")
-    private Long TIME_OUT;
+    private long TIME_OUT;
 
     public SseController(SseEmitters sseEmitters) {
         this.sseEmitters = sseEmitters;

@@ -44,6 +44,13 @@ public class SseEmitters {
             emitter.complete();
         });
 
+
+        emitter.onError((ex) -> {
+            log.error("Emitter error", ex);
+            emitter.completeWithError(ex);
+            this.emitterMap.get(playlistCode).remove(emitter);
+        });
+
         return emitter;
     }
 
