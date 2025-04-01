@@ -16,4 +16,4 @@ ddtube:
   video:
     code_length: 5
   sse:
-    time_out: 1000L * 60 * 30 # 30분
+    time_out: 1_800_000 # 30분 1000L * 60 * 30
