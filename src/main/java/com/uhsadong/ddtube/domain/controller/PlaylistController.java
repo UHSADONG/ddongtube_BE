@@ -95,4 +95,15 @@ public class PlaylistController {
             s3Util.upload(file)
         ));
     }
+
+    @PostMapping("/{playlistCode}/now-playing")
+    @Operation(summary = "[0328] 현재 재생 중인 영상 설정", description = "현재 재생중인 영상을 바꿉니다.")
+    public ResponseEntity<ApiResponse<String>> setNowPlaying(
+        @CurrentUser User user,
+        @PathVariable String playlistCode,
+        @RequestBody String videoCode
+    ) {
+        playlistCommandService.setNowPlayingVideo(user, playlistCode, videoCode);
+        return ResponseEntity.ok(ApiResponse.onSuccess("변경 완료"));
+    }
 }

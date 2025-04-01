@@ -73,7 +73,8 @@ public class Video {
     @Column(updatable = false)
     private LocalDateTime createdAt;
 
-    public static Video toEntity(Playlist playlist, User user, String code, String description, String videoUrl,
+    public static Video toEntity(Playlist playlist, User user, String code, String description,
+        String videoUrl,
         YoutubeOEmbedDTO youtubeInfo, Long priority) {
         return Video.builder()
             .playlist(playlist)
@@ -91,4 +92,5 @@ public class Video {
             .thumbnailWidth(Integer.valueOf(youtubeInfo.thumbnail_width()))
             .build();
     }
+
 }

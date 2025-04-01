@@ -1,5 +1,6 @@
 package com.uhsadong.ddtube.global.sse;
 
+import com.uhsadong.ddtube.domain.dto.response.VideoDetailResponseDTO;
 import com.uhsadong.ddtube.domain.entity.Video;
 import com.uhsadong.ddtube.domain.service.VideoQueryService;
 import com.uhsadong.ddtube.global.response.code.status.ErrorStatus;
@@ -67,6 +68,11 @@ public class SseEmitters {
             default -> throw new GeneralException(ErrorStatus._SSE_STATUS_ERROR);
         };
         sendByPlaylistCode("video", playlistCode, responseDTO);
+    }
+
+    public void sendNowPlayingVideoEventToClients(String playlistCode, Video video) {
+        VideoDetailResponseDTO responseDTO = videoQueryService.convertToVideoDetailResponseDTO(video);
+        sendByPlaylistCode("playing", playlistCode, responseDTO);
     }
 
     private void sendByPlaylistCode(String event, String playlistCode, Object responseDTO) {
