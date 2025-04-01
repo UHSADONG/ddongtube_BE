@@ -16,7 +16,8 @@ public record VideoDetailResponseDTO(
     String thumbnailUrl,
     Integer thumbnailHeight,
     Integer thumbnailWidth,
-    LocalDateTime createdAt
+    LocalDateTime createdAt,
+    Long priority
     ) {
 
 }

@@ -17,7 +17,7 @@ public class VideoQueryService {
     private final VideoRepository videoRepository;
 
     public List<Video> getVideoListByPlaylistCode(String playlistCode) {
-        return videoRepository.findAllByPlaylistCodeOrderByCreatedAt(playlistCode);
+        return videoRepository.findAllByPlaylistCodeOrderByPriority(playlistCode);
     }
 
     public List<VideoDetailResponseDTO> getVideoDetailListByPlaylistCode(String playlistCode) {
@@ -48,6 +48,7 @@ public class VideoQueryService {
             .thumbnailHeight(video.getThumbnailHeight())
             .thumbnailWidth(video.getThumbnailWidth())
             .createdAt(video.getCreatedAt())
+            .priority(video.getPriority())
             .build();
     }
 }
