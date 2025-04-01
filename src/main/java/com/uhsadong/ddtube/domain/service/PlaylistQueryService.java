@@ -44,6 +44,7 @@ public class PlaylistQueryService {
         return PlaylistMetaResponseDTO.builder()
             .title(playlist.getTitle())
             .thumbnailUrl(playlist.getThumbnailUrl())
+            .description(playlist.getDescription())
             .owner(ownerName)
             .userList(userNameList)
             .build();

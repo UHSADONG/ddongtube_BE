@@ -7,6 +7,7 @@ import lombok.Builder;
 public record PlaylistMetaResponseDTO(
     String title,
     String thumbnailUrl,
+    String description,
     String owner,
     List<String> userList
 ) {
