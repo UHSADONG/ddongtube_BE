@@ -45,7 +45,8 @@ public class VideoCommandService {
             .map(Video::getPriority)
             .orElse(0L);
         Video video = videoRepository.save(
-            Video.toEntity(playlist, user, code, requestDTO.videoUrl(), youtubeOEmbedDTO,
+            Video.toEntity(playlist, user, code, requestDTO.videoDescription(),
+                requestDTO.videoUrl(), youtubeOEmbedDTO,
                 priority + PRIORITY_STEP)
         );
         sseEmitters.sendVideoEventToClients(playlistCode, video, SseStatus.ADD);

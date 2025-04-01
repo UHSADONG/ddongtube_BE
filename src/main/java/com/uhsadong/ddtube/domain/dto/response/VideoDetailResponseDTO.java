@@ -7,6 +7,7 @@ import lombok.Builder;
 public record VideoDetailResponseDTO(
     UserDetailResponseDTO user,
     String code,
+    String description,
     String title,
     String authorName,
     String url,

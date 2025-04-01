@@ -45,6 +45,9 @@ public class Video {
     @Column(nullable = false, length = 5, unique = true)
     @Length(min = 5, max = 5)
     private String code; // 5자리 AlphaNumeric
+    @Length(max = 255)
+    @Column(nullable = true, length = 255)
+    private String description;
 
     @Positive
     private Long priority; // 재생목록 내 순서
@@ -70,12 +73,13 @@ public class Video {
     @Column(updatable = false)
     private LocalDateTime createdAt;
 
-    public static Video toEntity(Playlist playlist, User user, String code, String videoUrl,
+    public static Video toEntity(Playlist playlist, User user, String code, String description, String videoUrl,
         YoutubeOEmbedDTO youtubeInfo, Long priority) {
         return Video.builder()
             .playlist(playlist)
             .user(user)
             .code(code)
+            .description(description)
             .priority(priority)
             .title(youtubeInfo.title())
             .authorName(youtubeInfo.author_name())

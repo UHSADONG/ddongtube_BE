@@ -31,6 +31,7 @@ public class VideoQueryService {
                 .isAdmin(video.getUser().isAdmin())
                 .build())
             .code(video.getCode())
+            .description(video.getDescription())
             .title(video.getTitle())
             .authorName(video.getAuthorName())
             .url(video.getUrl())
