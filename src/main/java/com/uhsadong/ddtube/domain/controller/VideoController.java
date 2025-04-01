@@ -24,7 +24,7 @@ public class VideoController {
     private final VideoCommandService videoCommandService;
 
     @PostMapping("/{playlistCode}")
-    @Operation(summary = "[0328] 재생목록에 영상 추가", description = "재생목록에 영상을 추가하는 기능입니다.")
+    @Operation(summary = "재생목록에 영상 추가", description = "재생목록에 영상을 추가하는 기능입니다.")
     public ResponseEntity<ApiResponse<String>> addVideoToPlaylist(
         @CurrentUser User user,
         @PathVariable String playlistCode,
@@ -35,7 +35,7 @@ public class VideoController {
     }
 
     @DeleteMapping("/{playlistCode}/{videoCode}")
-    @Operation(summary = "[0328] 재생목록에서 영상 제거", description = "재생목록에 영상을 제거하는 기능입니다. \n관리자는 모든 영상을 지울 수 있으며, 일반 사용자는 본인이 업로드한 영상만 지울 수 있습니다.")
+    @Operation(summary = "재생목록에서 영상 제거", description = "재생목록에 영상을 제거하는 기능입니다. \n관리자는 모든 영상을 지울 수 있으며, 일반 사용자는 본인이 업로드한 영상만 지울 수 있습니다.")
     public ResponseEntity<ApiResponse<String>> deleteVideoInPlaylist(
         @CurrentUser User user,
         @PathVariable String playlistCode,
