@@ -4,13 +4,16 @@ import com.uhsadong.ddtube.domain.dto.request.CreatePlaylistRequestDTO;
 import com.uhsadong.ddtube.domain.dto.response.CreatePlaylistResponseDTO;
 import com.uhsadong.ddtube.domain.entity.Playlist;
 import com.uhsadong.ddtube.domain.entity.User;
+import com.uhsadong.ddtube.domain.entity.Video;
 import com.uhsadong.ddtube.domain.repository.PlaylistRepository;
 import com.uhsadong.ddtube.global.response.code.status.ErrorStatus;
 import com.uhsadong.ddtube.global.response.exception.GeneralException;
+import com.uhsadong.ddtube.global.sse.SseEmitters;
 import com.uhsadong.ddtube.global.util.IdGenerator;
 import com.uhsadong.ddtube.global.util.S3Util;
 import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -23,6 +26,9 @@ public class PlaylistCommandService {
     private final UserCommandService userCommandService;
     private final S3Util s3Util;
     private final UserQueryService userQueryService;
+    private final VideoQueryService videoQueryService;
+    private final SseEmitters sseEmitters;
+
     @Value("${ddtube.playlist.code_length}")
     private Integer PLAYLIST_CODE_LENGTH;
     @Value("${ddtube.playlist.delete_hours}")
@@ -70,6 +76,22 @@ public class PlaylistCommandService {
             throw new GeneralException(ErrorStatus._PLAYLIST_DELETE_PERMISSION_DENIED);
         }
         playlistRepository.delete(playlist);
+    }
+
+    @Transactional
+    public void setNowPlayingVideo(User user, String playlistCode, String videoCode) {
+        Playlist playlist = playlistRepository.findFirstByCode(playlistCode)
+            .orElseThrow(() -> new GeneralException(ErrorStatus._PLAYLIST_NOT_FOUND));
+        userQueryService.checkUserInPlaylist(user, playlist);
+        Video video = videoQueryService.getVideoByCodeOrThrow(videoCode);
+        if(playlist.getNowPlayVideo() != null && video.getId().equals(playlist.getNowPlayVideo().getId())){
+            return;
+        }
+        if(playlist.getId().equals(video.getPlaylist().getId())) {
+            throw new GeneralException(ErrorStatus._VIDEO_NOT_IN_PLAYLIST);
+        }
+        playlist.setNowPlayVideo(video);
+        sseEmitters.sendNowPlayingVideoEventToClients(playlistCode, video);
     }
 
 }

@@ -41,7 +41,8 @@ public class UserCommandService {
      * <p>따라서 회원가입 시 이름 중복 체크 안해도 됨</p>
      */
     @Transactional
-    public CreateUserResponseDTO getJwtTokenBySignInUp(String playlistCode, CreateUserRequestDTO requestDTO) {
+    public CreateUserResponseDTO getJwtTokenBySignInUp(String playlistCode,
+        CreateUserRequestDTO requestDTO) {
         Optional<User> optionalUser = userRepository.findFirstByPlaylistCodeAndName(playlistCode,
             requestDTO.name());
         if (optionalUser.isPresent()) { // 사용자 데이터가 있으면 로그인

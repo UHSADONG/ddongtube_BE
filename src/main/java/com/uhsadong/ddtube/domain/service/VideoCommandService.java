@@ -64,6 +64,10 @@ public class VideoCommandService {
         if (!(video.getUser().getId().equals(user.getId()) || user.isAdmin())) {
             throw new GeneralException(ErrorStatus._VIDEO_DELETE_PERMISSION_DENIED);
         }
+        if (playlist.getNowPlayVideo() != null && video.getId()
+            .equals(playlist.getNowPlayVideo().getId())) {
+            throw new GeneralException(ErrorStatus._CANNOT_DELETE_NOW_PLAY_VIDEO);
+        }
 
         videoRepository.delete(video);
         sseEmitters.sendVideoEventToClients(playlistCode, video, SseStatus.DELETE);

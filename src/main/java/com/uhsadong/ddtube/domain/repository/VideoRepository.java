@@ -14,4 +14,5 @@ public interface VideoRepository extends JpaRepository<Video, Long> {
     // Playlist Code에 해당하는 모든 Video의 개수를 센다.
     Optional<Video> findFirstByPlaylistCodeOrderByPriorityDesc(String playlistCode);
 
+    Optional<Video> findFirstByCode(String code);
 }

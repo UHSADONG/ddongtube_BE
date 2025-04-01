@@ -45,6 +45,11 @@ public enum ErrorStatus implements BaseErrorCode {
     // VIDEO
     _VIDEO_NOT_FOUND(HttpStatus.BAD_REQUEST, "VIDEO001", "해당 비디오를 찾을 수 없습니다."),
     _VIDEO_DELETE_PERMISSION_DENIED(HttpStatus.BAD_REQUEST, "VIDEO002", "해당 비디오를 삭제할 권한이 없습니다."),
+    _VIDEO_NOT_IN_PLAYLIST(HttpStatus.BAD_REQUEST, "VIDEO003", "해당 비디오는 해당 플레이리스트에 속해있지 않습니다."),
+    _CANNOT_DELETE_NOW_PLAY_VIDEO(HttpStatus.BAD_REQUEST, "VIDEO004", "현재 재생중인 비디오는 삭제할 수 없습니다."),
+
+    // YOUTUBE
+    _YOUTUBE_OEMBED_BAD_REQUEST(HttpStatus.BAD_REQUEST, "YOUTUBE001", "가져올 수 없는 영상입니다."),
     ;
 
     private final HttpStatus httpStatus;

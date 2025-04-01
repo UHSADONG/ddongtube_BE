@@ -4,6 +4,8 @@ import com.uhsadong.ddtube.domain.dto.response.UserDetailResponseDTO;
 import com.uhsadong.ddtube.domain.dto.response.VideoDetailResponseDTO;
 import com.uhsadong.ddtube.domain.entity.Video;
 import com.uhsadong.ddtube.domain.repository.VideoRepository;
+import com.uhsadong.ddtube.global.response.code.status.ErrorStatus;
+import com.uhsadong.ddtube.global.response.exception.GeneralException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,11 @@ public class VideoQueryService {
     public List<VideoDetailResponseDTO> getVideoDetailListByPlaylistCode(String playlistCode) {
         List<Video> videoList = getVideoListByPlaylistCode(playlistCode);
         return videoList.stream().map(this::convertToVideoDetailResponseDTO).toList();
+    }
+
+    public Video getVideoByCodeOrThrow(String videoCode) {
+        return videoRepository.findFirstByCode(videoCode)
+            .orElseThrow(() -> new GeneralException(ErrorStatus._VIDEO_NOT_FOUND));
     }
 
     public VideoDetailResponseDTO convertToVideoDetailResponseDTO(Video video) {
