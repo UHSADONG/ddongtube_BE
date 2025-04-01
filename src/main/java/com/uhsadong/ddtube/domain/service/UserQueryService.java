@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class UserQueryService {
+
     private final UserRepository userRepository;
 
     public List<User> getUserListByPlaylistCode(String playlistCode) {
@@ -19,7 +20,7 @@ public class UserQueryService {
     }
 
     public void checkUserInPlaylist(User user, Playlist playlist) {
-        if (!user.getPlaylist().equals(playlist)) {
+        if (!user.getPlaylist().getId().equals(playlist.getId())) {
             throw new GeneralException(ErrorStatus._USER_NOT_IN_PLAYLIST);
         }
     }

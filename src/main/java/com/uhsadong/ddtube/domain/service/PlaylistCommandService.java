@@ -84,7 +84,7 @@ public class PlaylistCommandService {
             .orElseThrow(() -> new GeneralException(ErrorStatus._PLAYLIST_NOT_FOUND));
         userQueryService.checkUserInPlaylist(user, playlist);
         Video video = videoQueryService.getVideoByCodeOrThrow(videoCode);
-        if(video.getId().equals(playlist.getNowPlayVideo().getId())){
+        if(playlist.getNowPlayVideo() != null && video.getId().equals(playlist.getNowPlayVideo().getId())){
             return;
         }
         if(playlist.getId().equals(video.getPlaylist().getId())) {
