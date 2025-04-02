@@ -4,6 +4,7 @@ import com.uhsadong.ddtube.domain.entity.User;
 import com.uhsadong.ddtube.global.response.code.status.ErrorStatus;
 import com.uhsadong.ddtube.global.response.exception.GeneralException;
 import com.uhsadong.ddtube.global.security.CurrentUser;
+import com.uhsadong.ddtube.global.security.CurrentUserCode;
 import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,7 +30,7 @@ public class SseController {
 
     @GetMapping(value = "/{playlistCode}/connect", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter connect(
-        @CurrentUser User user,
+        @CurrentUserCode String userCode,
         @PathVariable String playlistCode
     ) {
         SseEmitter emitter = new SseEmitter(TIME_OUT); // timeout 30분
