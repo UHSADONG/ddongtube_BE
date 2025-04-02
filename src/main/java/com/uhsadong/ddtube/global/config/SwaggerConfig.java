@@ -42,7 +42,7 @@ public class SwaggerConfig {
     private Info apiInfo() {
         return new Info()
             .title("디플리 Swagger")
-            .description("[0401]까지 개발된 사항이 반영되어있습니다.")
-            .version("1.0.0");
+            .description("[0402]까지 개발된 사항이 반영되어있습니다.")
+            .version("1.1.0");
     }
 }

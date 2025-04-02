@@ -92,7 +92,7 @@ public class SseEmitters {
                         .data(responseDTO));
                 } catch (IOException e) {
                     log.error("SSE send error", e);
-                    throw new GeneralException(ErrorStatus._SSE_SEND_ERROR);
+//                    throw new GeneralException(ErrorStatus._SSE_SEND_ERROR);
                 }
             }
         }
