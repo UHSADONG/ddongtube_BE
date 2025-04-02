@@ -9,6 +9,7 @@ import com.uhsadong.ddtube.domain.entity.User;
 import com.uhsadong.ddtube.domain.repository.PlaylistRepository;
 import com.uhsadong.ddtube.global.response.code.status.ErrorStatus;
 import com.uhsadong.ddtube.global.response.exception.GeneralException;
+import jakarta.transaction.Transactional;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -60,6 +61,7 @@ public class PlaylistQueryService {
             .build();
     }
 
+    @Transactional
     public PlaylistDetailResponseDTO getPlaylistDetail(User user, String playlistCode) {
         Playlist playlist = getPlaylistByCodeOrThrow(playlistCode);
         userQueryService.checkUserInPlaylist(user, playlist);

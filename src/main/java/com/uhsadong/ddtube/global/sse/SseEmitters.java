@@ -8,11 +8,10 @@ import com.uhsadong.ddtube.global.response.exception.GeneralException;
 import com.uhsadong.ddtube.global.sse.dto.CreateVideoSseResponseDTO;
 import com.uhsadong.ddtube.global.sse.dto.DeleteVideoSseResponsDTO;
 import com.uhsadong.ddtube.global.sse.dto.UpdateVideoSseResponseDTO;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -24,7 +23,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 public class SseEmitters {
 
     private final VideoQueryService videoQueryService;
-    private final Map<String, List<SseEmitter>> emitterMap = new HashMap<>();
+    private final Map<String, List<SseEmitter>> emitterMap = new ConcurrentHashMap<>();
 
     SseEmitter add(String playlistCode, SseEmitter emitter) {
         if (!this.emitterMap.containsKey(playlistCode)) {
@@ -37,18 +36,23 @@ public class SseEmitters {
         emitter.onCompletion(() -> {
             log.info("onCompletion callback");
             this.emitterMap.get(playlistCode).remove(emitter);
+            log.info("emitter list: {}, count: {}", this.emitterMap.get(playlistCode),
+                this.emitterMap.get(playlistCode).size());
         });
         emitter.onTimeout(() -> {
             log.info("onTimeout callback");
             this.emitterMap.get(playlistCode).remove(emitter);
             emitter.complete();
+            log.info("emitter list: {}, count: {}", this.emitterMap.get(playlistCode),
+                this.emitterMap.get(playlistCode).size());
         });
 
-
-        emitter.onError((ex) -> {
-            log.error("Emitter error", ex);
-            emitter.completeWithError(ex);
+        emitter.onError((e) -> {
+            log.error("Emitter error", e);
+            emitter.completeWithError(e);
             this.emitterMap.get(playlistCode).remove(emitter);
+            log.info("emitter list: {}, count: {}", this.emitterMap.get(playlistCode),
+                this.emitterMap.get(playlistCode).size());
         });
 
         return emitter;
@@ -78,21 +82,23 @@ public class SseEmitters {
     }
 
     public void sendNowPlayingVideoEventToClients(String playlistCode, Video video) {
-        VideoDetailResponseDTO responseDTO = videoQueryService.convertToVideoDetailResponseDTO(video);
+        VideoDetailResponseDTO responseDTO = videoQueryService.convertToVideoDetailResponseDTO(
+            video);
         sendByPlaylistCode("playing", playlistCode, responseDTO);
     }
 
     private void sendByPlaylistCode(String event, String playlistCode, Object responseDTO) {
         List<SseEmitter> emitters = emitterMap.get(playlistCode);
         if (emitters != null) {
-            for (SseEmitter emitter : emitters) {
+            for (SseEmitter emitter : new ArrayList<>(emitters)) {
                 try {
                     emitter.send(SseEmitter.event()
                         .name(event)
                         .data(responseDTO));
-                } catch (IOException e) {
-                    log.error("SSE send error", e);
-//                    throw new GeneralException(ErrorStatus._SSE_SEND_ERROR);
+                } catch (Exception e) {
+                    log.info("SSE send error", e);
+                    emitter.completeWithError(e); // 연결 종료
+                    emitters.remove(emitter);
                 }
             }
         }

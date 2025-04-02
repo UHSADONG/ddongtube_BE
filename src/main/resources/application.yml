@@ -6,6 +6,9 @@ spring:
       enabled: true
       max-file-size: 20MB
       max-request-size: 20MB
+logging:
+  pattern:
+    console: "%yellow(%d{yyyy-MM-ddTHH:mm:ss.SSS}) [%20.20thread] %highlight(%-5level) %cyan(%-30.30C{0}) - %msg%n"
 ddtube:
   playlist:
     code_length: 5
