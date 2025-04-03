@@ -5,6 +5,7 @@ import com.uhsadong.ddtube.domain.entity.Video;
 import com.uhsadong.ddtube.domain.service.VideoQueryService;
 import com.uhsadong.ddtube.global.response.code.status.ErrorStatus;
 import com.uhsadong.ddtube.global.response.exception.GeneralException;
+import com.uhsadong.ddtube.global.sse.dto.ConnectionCountSseResponseDTO;
 import com.uhsadong.ddtube.global.sse.dto.CreateVideoSseResponseDTO;
 import com.uhsadong.ddtube.global.sse.dto.DeleteVideoSseResponsDTO;
 import com.uhsadong.ddtube.global.sse.dto.UpdateVideoSseResponseDTO;
@@ -85,6 +86,26 @@ public class SseEmitters {
         VideoDetailResponseDTO responseDTO = videoQueryService.convertToVideoDetailResponseDTO(
             video);
         sendByPlaylistCode("playing", playlistCode, responseDTO);
+    }
+
+    public void sendPingWithConnectionCount() {
+        for (Map.Entry<String, List<SseEmitter>> entry : emitterMap.entrySet()) {
+            List<SseEmitter> emitters = entry.getValue();
+            ConnectionCountSseResponseDTO responseDTO = ConnectionCountSseResponseDTO.builder()
+                .clientCount((long) emitters.size())
+                .build();
+            for (SseEmitter emitter : new ArrayList<>(emitters)) {
+                try {
+                    emitter.send(SseEmitter.event()
+                        .name("ping")
+                        .data(responseDTO));
+                } catch (Exception e) {
+                    log.info("SSE send error", e);
+                    emitter.completeWithError(e); // 연결 종료
+                    emitters.remove(emitter);
+                }
+            }
+        }
     }
 
     private void sendByPlaylistCode(String event, String playlistCode, Object responseDTO) {
