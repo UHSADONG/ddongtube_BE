@@ -1,7 +1,6 @@
 package com.uhsadong.ddtube.global.sse;
 
 import com.uhsadong.ddtube.domain.dto.UserSimpleDTO;
-import com.uhsadong.ddtube.domain.dto.response.VideoDetailResponseDTO;
 import com.uhsadong.ddtube.domain.entity.Video;
 import com.uhsadong.ddtube.domain.service.VideoQueryService;
 import com.uhsadong.ddtube.global.response.code.status.ErrorStatus;
@@ -10,6 +9,7 @@ import com.uhsadong.ddtube.global.sse.dto.ConnectionCountSseResponseDTO;
 import com.uhsadong.ddtube.global.sse.dto.ConnectionCreateSseResponseDTO;
 import com.uhsadong.ddtube.global.sse.dto.CreateVideoSseResponseDTO;
 import com.uhsadong.ddtube.global.sse.dto.DeleteVideoSseResponsDTO;
+import com.uhsadong.ddtube.global.sse.dto.UpdatePlayingVideoSseResponseDTO;
 import com.uhsadong.ddtube.global.sse.dto.UpdateVideoSseResponseDTO;
 import java.util.ArrayList;
 import java.util.List;
@@ -104,9 +104,12 @@ public class SseService {
         sendByPlaylistCode("video", playlistCode, responseDTO);
     }
 
-    public void sendNowPlayingVideoEventToClients(String playlistCode, Video video) {
-        VideoDetailResponseDTO responseDTO = videoQueryService.convertToVideoDetailResponseDTO(
-            video);
+    public void sendNowPlayingVideoEventToClients(String playlistCode, Video video,
+        String userName) {
+        UpdatePlayingVideoSseResponseDTO responseDTO = UpdatePlayingVideoSseResponseDTO.builder()
+            .videoCode(video.getCode())
+            .userName(userName)
+            .build();
         sendByPlaylistCode("playing", playlistCode, responseDTO);
     }
 
