@@ -1,5 +1,6 @@
 package com.uhsadong.ddtube.global.security;
 
+import com.uhsadong.ddtube.domain.dto.UserSimpleDTO;
 import com.uhsadong.ddtube.global.logger.enums.MdcKey;
 import com.uhsadong.ddtube.global.response.code.status.ErrorStatus;
 import com.uhsadong.ddtube.global.response.exception.GeneralException;
@@ -22,7 +23,7 @@ public class CurrentUserCodeArgumentResolver implements HandlerMethodArgumentRes
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
         return parameter.getParameterAnnotation(CurrentUserCode.class) != null
-            && parameter.getParameterType().equals(String.class);
+            && parameter.getParameterType().equals(UserSimpleDTO.class);
     }
 
     @Override
@@ -37,11 +38,12 @@ public class CurrentUserCodeArgumentResolver implements HandlerMethodArgumentRes
         throw new GeneralException(ErrorStatus._EMPTY_JWT);
     }
 
-    public String loadUserFromToken(String token) {
+    public UserSimpleDTO loadUserFromToken(String token) {
         try {
-            String userCode = jwtUtil.getUserCodeInJwt(token);
-            MDC.put(MdcKey.USER_ID.name(), userCode);
-            return userCode;
+
+            UserSimpleDTO userDTO = jwtUtil.getUserSimpleDataInJwt(token);
+            MDC.put(MdcKey.USER_ID.name(), userDTO.userCode());
+            return userDTO;
 
         } catch (Exception ex) {
             throw new GeneralException(ErrorStatus._INVALID_JWT);

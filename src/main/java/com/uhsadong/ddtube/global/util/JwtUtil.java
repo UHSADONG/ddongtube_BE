@@ -1,5 +1,6 @@
 package com.uhsadong.ddtube.global.util;
 
+import com.uhsadong.ddtube.domain.dto.UserSimpleDTO;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
@@ -22,21 +23,39 @@ public class JwtUtil {
     private String secretKey;
 
     // 토큰 생성
-    public String generateAccessToken(String userCode) {
+    public String generateAccessToken(String userCode, String playlistCode, String userName) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + accessExpirationMillis);
 
         return Jwts.builder()
             .setSubject(userCode)
+            .claim("playlistCode", playlistCode)
+            .claim("userName", userName)
             .setIssuedAt(now)
             .setExpiration(expiryDate)
             .signWith(convertSecretToKey(secretKey))
             .compact();
     }
 
+    public UserSimpleDTO getUserSimpleDataInJwt(String token) {
+        return UserSimpleDTO.builder()
+            .userCode(getUserCodeInJwt(token))
+            .playlistCode(getPlaylistCodeInJwt(token))
+            .userName(getUserNameInJwt(token))
+            .build();
+    }
+
     // 토큰에서 subject(email 등) 추출
     public String getUserCodeInJwt(String token) {
         return parseClaims(token).getSubject();
+    }
+
+    public String getUserNameInJwt(String token) {
+        return parseClaims(token).get("userName", String.class);
+    }
+
+    public String getPlaylistCodeInJwt(String token) {
+        return parseClaims(token).get("playlistCode", String.class);
     }
 
     // 토큰 유효성 검증
