@@ -5,7 +5,8 @@ import lombok.Builder;
 @Builder
 public record UpdatePlayingVideoSseResponseDTO(
     String videoCode,
-    String userName
+    String userName,
+    Boolean autoPlay
 ) {
 
 }
