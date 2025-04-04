@@ -90,7 +90,7 @@ public class PlaylistCommandService {
             throw new GeneralException(ErrorStatus._VIDEO_NOT_IN_PLAYLIST);
         }
         playlist.setNowPlayVideo(video);
-        sseService.sendNowPlayingVideoEventToClients(playlistCode, video);
+        sseService.sendNowPlayingVideoEventToClients(playlistCode, video, user.getName());
     }
 
 }
