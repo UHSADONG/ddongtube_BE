@@ -102,9 +102,10 @@ public class PlaylistController {
     public ResponseEntity<ApiResponse<String>> setNowPlaying(
         @CurrentUser User user,
         @PathVariable String playlistCode,
-        @RequestParam String videoCode
+        @RequestParam String videoCode,
+        @RequestParam(defaultValue = "false") Boolean autoPlay
     ) {
-        playlistCommandService.setNowPlayingVideo(user, playlistCode, videoCode);
+        playlistCommandService.setNowPlayingVideo(user, playlistCode, videoCode, autoPlay);
         return ResponseEntity.ok(ApiResponse.onSuccess("변경 완료"));
     }
 }

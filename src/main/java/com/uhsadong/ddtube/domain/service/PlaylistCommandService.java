@@ -53,7 +53,8 @@ public class PlaylistCommandService {
             ? defaultThumbnailUrl : requestDTO.thumbnailUrl();
 
         Playlist playlist = playlistRepository.save(
-            Playlist.toEntity(code, requestDTO.playlistTitle(), requestDTO.playlistDescription(), thumbnailUrl, willDeleteAt)
+            Playlist.toEntity(code, requestDTO.playlistTitle(), requestDTO.playlistDescription(),
+                thumbnailUrl, willDeleteAt)
         );
 
         String accessToken = userCommandService.createPlaylistCreator(
@@ -78,19 +79,23 @@ public class PlaylistCommandService {
     }
 
     @Transactional
-    public void setNowPlayingVideo(User user, String playlistCode, String videoCode) {
+    public void setNowPlayingVideo(User user, String playlistCode, String videoCode,
+        Boolean autoPlay) {
         Playlist playlist = playlistRepository.findFirstByCode(playlistCode)
             .orElseThrow(() -> new GeneralException(ErrorStatus._PLAYLIST_NOT_FOUND));
         userQueryService.checkUserInPlaylist(user, playlist);
         Video video = videoQueryService.getVideoByCodeOrThrow(videoCode);
-        if(playlist.getNowPlayVideo() != null && video.getId().equals(playlist.getNowPlayVideo().getId())){
+        if (playlist.getNowPlayVideo() != null && video.getId()
+            .equals(playlist.getNowPlayVideo().getId())) {
             return;
         }
-        if(!playlist.getId().equals(video.getPlaylist().getId())) {
+        if (!playlist.getId().equals(video.getPlaylist().getId())) {
             throw new GeneralException(ErrorStatus._VIDEO_NOT_IN_PLAYLIST);
         }
         playlist.setNowPlayVideo(video);
-        sseService.sendNowPlayingVideoEventToClients(playlistCode, video, user.getName());
+
+        sseService.sendNowPlayingVideoEventToClients(playlistCode, video, user.getName(), autoPlay);
+
     }
 
 }

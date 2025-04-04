@@ -105,10 +105,11 @@ public class SseService {
     }
 
     public void sendNowPlayingVideoEventToClients(String playlistCode, Video video,
-        String userName) {
+        String userName, Boolean autoPlay) {
         UpdatePlayingVideoSseResponseDTO responseDTO = UpdatePlayingVideoSseResponseDTO.builder()
             .videoCode(video.getCode())
             .userName(userName)
+            .autoPlay(autoPlay)
             .build();
         sendByPlaylistCode("playing", playlistCode, responseDTO);
     }
