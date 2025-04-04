@@ -33,13 +33,7 @@ public class SseController {
     ) {
         SseEmitter emitter = new SseEmitter(TIME_OUT); // timeout 30분
         sseService.add(playlistCode, userCode, emitter);
-        try {
-            emitter.send(SseEmitter.event()
-                .name("connect")
-                .data("connected!"));
-        } catch (IOException e) {
-            throw new GeneralException(ErrorStatus._SSE_CONNECTION_ERROR);
-        }
+
         return emitter;
     }
 }
