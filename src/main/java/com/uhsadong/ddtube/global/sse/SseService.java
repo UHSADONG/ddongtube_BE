@@ -1,5 +1,6 @@
 package com.uhsadong.ddtube.global.sse;
 
+import com.uhsadong.ddtube.domain.dto.UserSimpleDTO;
 import com.uhsadong.ddtube.domain.dto.response.VideoDetailResponseDTO;
 import com.uhsadong.ddtube.domain.entity.Video;
 import com.uhsadong.ddtube.domain.service.VideoQueryService;
@@ -27,7 +28,7 @@ public class SseService {
     private final VideoQueryService videoQueryService;
     private final Map<String, List<SseEmitter>> emitterMap = new ConcurrentHashMap<>();
 
-    void add(String playlistCode, String userCode, SseEmitter emitter) {
+    void add(String playlistCode, UserSimpleDTO userSimpleDTO, SseEmitter emitter) {
         if (!this.emitterMap.containsKey(playlistCode)) {
             this.emitterMap.put(playlistCode, new ArrayList<>());
         }
@@ -35,7 +36,7 @@ public class SseService {
         // 이미 존재하는 Emitter에 참여 알림 전송
         ConnectionCreateSseResponseDTO responseDTO = ConnectionCreateSseResponseDTO.builder()
             .clientCount((long) this.emitterMap.get(playlistCode).size() + 1)
-            .userName(userCode) // TODO: JWT에 userName 추가해서 수정하기
+            .userName(userSimpleDTO.userName())
             .build();
         sendByPlaylistCode("enter", playlistCode, responseDTO); // 방 참가 정보 뿌림
 
@@ -44,23 +45,28 @@ public class SseService {
         // 새로운 Emitter에 연결 알림 전송
         responseDTO = ConnectionCreateSseResponseDTO.builder()
             .clientCount((long) this.emitterMap.get(playlistCode).size())
-            .userName(userCode) // TODO: JWT에 userName 추가해서 수정하기
+            .userName(userSimpleDTO.userName())
             .build();
         sendByEmitter(emitter, "connect", playlistCode, responseDTO); // 연결 완료 여부 반환
 
-        log.info("[    CONN] Playlist {} | User {} | Emitter {} | TotalConnect {}"
-            , playlistCode, userCode, emitter, this.emitterMap.get(playlistCode).size());
+        log.info(
+            "[    CONN] Playlist {} | User {} | Emitter {} | TotalConnect {}"
+            , playlistCode, userSimpleDTO.userCode(), emitter,
+            this.emitterMap.get(playlistCode).size());
         emitter.onCompletion(() -> {
                 this.emitterMap.get(playlistCode).remove(emitter);
-                log.info("[ DISCONN] COMPLETION | Playlist {} | User {} | Emitter {} | TotalConnect {}"
-                    , playlistCode, userCode, emitter, this.emitterMap.get(playlistCode).size());
+                log.info(
+                    "[ DISCONN] COMPLETION | Playlist {} | User {} | Emitter {} | TotalConnect {}"
+                    , playlistCode, userSimpleDTO.userCode(), emitter,
+                    this.emitterMap.get(playlistCode).size());
             }
         );
         emitter.onTimeout(() -> {
             emitter.complete();
             this.emitterMap.get(playlistCode).remove(emitter);
             log.info("[ DISCONN] TIMEOUT | Playlist {} | User {} | Emitter {} | TotalConnect {}"
-                , playlistCode, userCode, emitter, this.emitterMap.get(playlistCode).size());
+                , playlistCode, userSimpleDTO.userCode(), emitter,
+                this.emitterMap.get(playlistCode).size());
         });
 
         emitter.onError(e -> {
@@ -68,7 +74,8 @@ public class SseService {
             this.emitterMap.get(playlistCode).remove(emitter);
             log.info(
                 "[ DISCONN] ERROR | Playlist {} | User {} | Emitter {} | TotalConnect {} | Error {}"
-                , playlistCode, userCode, emitter, this.emitterMap.get(playlistCode).size()
+                , playlistCode, userSimpleDTO.userCode(), emitter,
+                this.emitterMap.get(playlistCode).size()
                 , e.getMessage());
         });
 

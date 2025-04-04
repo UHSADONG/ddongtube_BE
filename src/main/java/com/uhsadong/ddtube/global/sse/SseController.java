@@ -1,5 +1,6 @@
 package com.uhsadong.ddtube.global.sse;
 
+import com.uhsadong.ddtube.domain.dto.UserSimpleDTO;
 import com.uhsadong.ddtube.global.response.code.status.ErrorStatus;
 import com.uhsadong.ddtube.global.response.exception.GeneralException;
 import com.uhsadong.ddtube.global.security.CurrentUserCode;
@@ -28,11 +29,11 @@ public class SseController {
 
     @GetMapping(value = "/{playlistCode}/connect", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter connect(
-        @CurrentUserCode String userCode,
+        @CurrentUserCode UserSimpleDTO userSimpleDTO,
         @PathVariable String playlistCode
     ) {
         SseEmitter emitter = new SseEmitter(TIME_OUT); // timeout 30분
-        sseService.add(playlistCode, userCode, emitter);
+        sseService.add(playlistCode, userSimpleDTO, emitter);
 
         return emitter;
     }

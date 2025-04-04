@@ -33,7 +33,7 @@ public class UserCommandService {
         User user = userRepository.save(
             User.toEntity(playlist, code, name, passwordEncoder.encode(password), true)
         );
-        return jwtUtil.generateAccessToken(user.getCode());
+        return jwtUtil.generateAccessToken(user.getCode(), playlist.getCode(), user.getName());
     }
 
     /**
@@ -46,7 +46,7 @@ public class UserCommandService {
         Optional<User> optionalUser = userRepository.findFirstByPlaylistCodeAndName(playlistCode,
             requestDTO.name());
         if (optionalUser.isPresent()) { // 사용자 데이터가 있으면 로그인
-            return signIn(optionalUser.get(), requestDTO.password());
+            return signIn(playlistCode, optionalUser.get(), requestDTO.password());
         }
         // 없으면 회원가입
         return signUp(playlistCode, requestDTO);
@@ -55,11 +55,12 @@ public class UserCommandService {
     /**
      * 사용자 데이터가 존재할 때에는 로그인을 시도한다.
      */
-    private CreateUserResponseDTO signIn(User user, String password) {
+    private CreateUserResponseDTO signIn(String playlistCode, User user, String password) {
         // password는 인코딩 전, user.getPassword는 인코딩 후
         if (passwordEncoder.matches(password, user.getPassword())) {
             return CreateUserResponseDTO.builder()
-                .accessToken(jwtUtil.generateAccessToken(user.getCode()))
+                .accessToken(
+                    jwtUtil.generateAccessToken(user.getCode(), playlistCode, user.getName()))
                 .isAdmin(user.isAdmin())
                 .build();
         }
@@ -77,7 +78,7 @@ public class UserCommandService {
                 passwordEncoder.encode(requestDTO.password()), false)
         );
         return CreateUserResponseDTO.builder()
-            .accessToken(jwtUtil.generateAccessToken(user.getCode()))
+            .accessToken(jwtUtil.generateAccessToken(user.getCode(), playlistCode, user.getName()))
             .isAdmin(user.isAdmin())
             .build();
     }
