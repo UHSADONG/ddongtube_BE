@@ -8,7 +8,7 @@ import com.uhsadong.ddtube.domain.entity.Video;
 import com.uhsadong.ddtube.domain.repository.VideoRepository;
 import com.uhsadong.ddtube.global.response.code.status.ErrorStatus;
 import com.uhsadong.ddtube.global.response.exception.GeneralException;
-import com.uhsadong.ddtube.global.sse.SseEmitters;
+import com.uhsadong.ddtube.global.sse.SseService;
 import com.uhsadong.ddtube.global.sse.SseStatus;
 import com.uhsadong.ddtube.global.util.IdGenerator;
 import com.uhsadong.ddtube.global.util.YoutubeOEmbed;
@@ -26,7 +26,7 @@ public class VideoCommandService {
     private final VideoRepository videoRepository;
     private final PlaylistQueryService playlistQueryService;
     private final UserQueryService userQueryService;
-    private final SseEmitters sseEmitters;
+    private final SseService sseService;
     @Value("${ddtube.video.code_length}")
     private int VIDEO_CODE_LENGTH;
     @Value("${ddtube.playlist.priority_step}")
@@ -49,7 +49,7 @@ public class VideoCommandService {
                 requestDTO.videoUrl(), youtubeOEmbedDTO,
                 priority + PRIORITY_STEP)
         );
-        sseEmitters.sendVideoEventToClients(playlistCode, video, SseStatus.ADD);
+        sseService.sendVideoEventToClients(playlistCode, video, SseStatus.ADD);
 
     }
 
@@ -70,7 +70,7 @@ public class VideoCommandService {
         }
 
         videoRepository.delete(video);
-        sseEmitters.sendVideoEventToClients(playlistCode, video, SseStatus.DELETE);
+        sseService.sendVideoEventToClients(playlistCode, video, SseStatus.DELETE);
     }
 
 }

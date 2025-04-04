@@ -2,10 +2,12 @@ package com.uhsadong.ddtube.global.security;
 
 import com.uhsadong.ddtube.domain.entity.User;
 import com.uhsadong.ddtube.domain.repository.UserRepository;
+import com.uhsadong.ddtube.global.logger.enums.MdcKey;
 import com.uhsadong.ddtube.global.response.code.status.ErrorStatus;
 import com.uhsadong.ddtube.global.response.exception.GeneralException;
 import com.uhsadong.ddtube.global.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.MDC;
 import org.springframework.core.MethodParameter;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -40,6 +42,8 @@ public class CurrentUserArgumentResolver implements HandlerMethodArgumentResolve
     public User loadUserFromToken(String token) {
         try {
             String userCode = jwtUtil.getUserCodeInJwt(token);
+
+            MDC.put(MdcKey.USER_ID.name(), userCode);
 
             return userRepository.findByCode(userCode)
                 .orElseThrow(() -> new GeneralException(ErrorStatus._USER_NOT_FOUND));

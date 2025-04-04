@@ -1,5 +1,6 @@
 package com.uhsadong.ddtube.global.response.exception;
 
+import com.uhsadong.ddtube.global.logger.enums.MdcKey;
 import com.uhsadong.ddtube.global.response.ApiResponse;
 import com.uhsadong.ddtube.global.response.code.ErrorReasonDto;
 import com.uhsadong.ddtube.global.response.code.status.ErrorStatus;
@@ -7,8 +8,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -37,7 +40,7 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
             .findFirst()
             .orElseThrow(() -> new RuntimeException("ConstraintViolationException 추출 도중 에러 발생"));
 
-        log.error(errorMessage);
+        log.info("[   Valid] rid {} | {}", MDC.get(MdcKey.REQUEST_ID.name()), errorMessage);
         return handleExceptionInternalConstraint(e, HttpHeaders.EMPTY, request, errorMessage);
     }
 
@@ -59,7 +62,7 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
                         + newErrorMessage);
             });
 
-        log.error(errors.toString());
+        log.error("[   Valid] rid {} | {}", MDC.get(MdcKey.REQUEST_ID.name()), errors);
         return handleExceptionInternalArgs(e, HttpHeaders.EMPTY,
             ErrorStatus.valueOf("_BAD_REQUEST"), request, errors);
     }
@@ -68,7 +71,11 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
     @ExceptionHandler
     public ResponseEntity<Object> exception(Exception e, WebRequest request) {
 
-        log.error(e.getMessage());
+        String errorMessage = e.getMessage();
+        String errorPoint = Objects.isNull(e.getStackTrace()) ? "No Stack Trace Error."
+            : e.getStackTrace()[0].toString();
+        log.error("[   ERROR] rid {} | {} | {}", MDC.get(MdcKey.REQUEST_ID.name()),
+            errorMessage, errorPoint);
         return handleExceptionInternalFalse(e, ErrorStatus._INTERNAL_SERVER_ERROR,
             HttpHeaders.EMPTY, ErrorStatus._INTERNAL_SERVER_ERROR.getHttpStatus(), request,
             e.getMessage());
@@ -79,8 +86,11 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
     public ResponseEntity onThrowException(GeneralException generalException,
         HttpServletRequest request) {
 
+        log.info("[   ERROR] rid {} | {} | {}", MDC.get(MdcKey.REQUEST_ID.name()),
+            generalException.getErrorReasonHttpStatus().getCode(),
+            generalException.getErrorReasonHttpStatus().getMessage());
+
         ErrorReasonDto errorReasonHttpStatus = generalException.getErrorReasonHttpStatus();
-        log.error(errorReasonHttpStatus.getMessage());
         return handleExceptionInternal(generalException, errorReasonHttpStatus, null, request);
     }
 

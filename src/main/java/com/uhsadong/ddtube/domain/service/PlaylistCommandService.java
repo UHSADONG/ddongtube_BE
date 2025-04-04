@@ -8,12 +8,11 @@ import com.uhsadong.ddtube.domain.entity.Video;
 import com.uhsadong.ddtube.domain.repository.PlaylistRepository;
 import com.uhsadong.ddtube.global.response.code.status.ErrorStatus;
 import com.uhsadong.ddtube.global.response.exception.GeneralException;
-import com.uhsadong.ddtube.global.sse.SseEmitters;
+import com.uhsadong.ddtube.global.sse.SseService;
 import com.uhsadong.ddtube.global.util.IdGenerator;
 import com.uhsadong.ddtube.global.util.S3Util;
 import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
-import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -27,7 +26,7 @@ public class PlaylistCommandService {
     private final S3Util s3Util;
     private final UserQueryService userQueryService;
     private final VideoQueryService videoQueryService;
-    private final SseEmitters sseEmitters;
+    private final SseService sseService;
 
     @Value("${ddtube.playlist.code_length}")
     private Integer PLAYLIST_CODE_LENGTH;
@@ -91,7 +90,7 @@ public class PlaylistCommandService {
             throw new GeneralException(ErrorStatus._VIDEO_NOT_IN_PLAYLIST);
         }
         playlist.setNowPlayVideo(video);
-        sseEmitters.sendNowPlayingVideoEventToClients(playlistCode, video);
+        sseService.sendNowPlayingVideoEventToClients(playlistCode, video);
     }
 
 }

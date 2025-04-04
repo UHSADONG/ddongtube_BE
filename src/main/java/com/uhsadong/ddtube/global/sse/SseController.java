@@ -1,9 +1,7 @@
 package com.uhsadong.ddtube.global.sse;
 
-import com.uhsadong.ddtube.domain.entity.User;
 import com.uhsadong.ddtube.global.response.code.status.ErrorStatus;
 import com.uhsadong.ddtube.global.response.exception.GeneralException;
-import com.uhsadong.ddtube.global.security.CurrentUser;
 import com.uhsadong.ddtube.global.security.CurrentUserCode;
 import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
@@ -20,12 +18,12 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 @Slf4j
 public class SseController {
 
-    private final SseEmitters sseEmitters;
+    private final SseService sseService;
     @Value("${ddtube.sse.time_out}")
     private long TIME_OUT;
 
-    public SseController(SseEmitters sseEmitters) {
-        this.sseEmitters = sseEmitters;
+    public SseController(SseService sseService) {
+        this.sseService = sseService;
     }
 
     @GetMapping(value = "/{playlistCode}/connect", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
@@ -34,7 +32,7 @@ public class SseController {
         @PathVariable String playlistCode
     ) {
         SseEmitter emitter = new SseEmitter(TIME_OUT); // timeout 30분
-        sseEmitters.add(playlistCode, emitter);
+        sseService.add(playlistCode, userCode, emitter);
         try {
             emitter.send(SseEmitter.event()
                 .name("connect")

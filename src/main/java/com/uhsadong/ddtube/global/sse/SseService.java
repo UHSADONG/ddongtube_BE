@@ -15,45 +15,43 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-@Component
 @Slf4j
+@Service
 @RequiredArgsConstructor
-public class SseEmitters {
+public class SseService {
 
     private final VideoQueryService videoQueryService;
     private final Map<String, List<SseEmitter>> emitterMap = new ConcurrentHashMap<>();
 
-    SseEmitter add(String playlistCode, SseEmitter emitter) {
+    SseEmitter add(String playlistCode, String userCode, SseEmitter emitter) {
         if (!this.emitterMap.containsKey(playlistCode)) {
             this.emitterMap.put(playlistCode, new ArrayList<>());
         }
         this.emitterMap.get(playlistCode).add(emitter);
-        log.info("ADD Emitter - Playlist: {}, Emitter: {}", playlistCode, emitter);
-        log.info("emitter list: {}, count: {}", this.emitterMap.get(playlistCode),
-            this.emitterMap.get(playlistCode).size());
+        log.info("[    CONN] Playlist {} | User {} | Emitter {} | TotalConnect {}"
+            , playlistCode, userCode, emitter, this.emitterMap.get(playlistCode).size());
         emitter.onCompletion(() -> {
-            log.info("onCompletion callback");
             this.emitterMap.get(playlistCode).remove(emitter);
-            log.info("emitter list: {}, count: {}", this.emitterMap.get(playlistCode),
-                this.emitterMap.get(playlistCode).size());
-        });
+            log.info("[ DISCONN] COMPLETION | Playlist {} | User {} | Emitter {} | TotalConnect {}"
+                , playlistCode, userCode, emitter, this.emitterMap.get(playlistCode).size());
+            }
+        );
         emitter.onTimeout(() -> {
-            log.info("onTimeout callback");
-            this.emitterMap.get(playlistCode).remove(emitter);
             emitter.complete();
-            log.info("emitter list: {}, count: {}", this.emitterMap.get(playlistCode),
-                this.emitterMap.get(playlistCode).size());
+            this.emitterMap.get(playlistCode).remove(emitter);
+            log.info("[ DISCONN] TIMEOUT | Playlist {} | User {} | Emitter {} | TotalConnect {}"
+                , playlistCode, userCode, emitter, this.emitterMap.get(playlistCode).size());
         });
 
         emitter.onError((e) -> {
-            log.error("Emitter error", e);
             emitter.completeWithError(e);
             this.emitterMap.get(playlistCode).remove(emitter);
-            log.info("emitter list: {}, count: {}", this.emitterMap.get(playlistCode),
-                this.emitterMap.get(playlistCode).size());
+            log.info("[ DISCONN] ERROR | Playlist {} | User {} | Emitter {} | TotalConnect {} | Error {}"
+                , playlistCode, userCode, emitter, this.emitterMap.get(playlistCode).size()
+                , e.getMessage());
         });
 
         return emitter;
@@ -100,7 +98,6 @@ public class SseEmitters {
                         .name("ping")
                         .data(responseDTO));
                 } catch (Exception e) {
-                    log.info("SSE send error", e);
                     emitter.completeWithError(e); // 연결 종료
                     emitters.remove(emitter);
                 }
@@ -117,7 +114,6 @@ public class SseEmitters {
                         .name(event)
                         .data(responseDTO));
                 } catch (Exception e) {
-                    log.info("SSE send error", e);
                     emitter.completeWithError(e); // 연결 종료
                     emitters.remove(emitter);
                 }
