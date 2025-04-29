@@ -30,8 +30,8 @@ public class PlaylistCommandService {
 
     @Value("${ddtube.playlist.code_length}")
     private Integer PLAYLIST_CODE_LENGTH;
-    @Value("${ddtube.playlist.delete_hours}")
-    private Integer PLAYLIST_DELETE_HOURS;
+    @Value("${ddtube.playlist.delete_days}")
+    private Integer PLAYLIST_DELETE_DAYS;
 
     @Value("${aws.s3.default-thumbneil-url}")
     private String defaultThumbnailUrl;
@@ -44,7 +44,7 @@ public class PlaylistCommandService {
         CreatePlaylistRequestDTO requestDTO
     ) {
         String code = IdGenerator.generateShortId(PLAYLIST_CODE_LENGTH);
-        LocalDateTime willDeleteAt = LocalDateTime.now().plusHours(PLAYLIST_DELETE_HOURS);
+        LocalDateTime lastLoginAt = LocalDateTime.now().plusDays(PLAYLIST_DELETE_DAYS);
 
         if (!(s3Util.isS3Url(requestDTO.thumbnailUrl()) || requestDTO.thumbnailUrl().isEmpty())) {
             throw new GeneralException(ErrorStatus._INVALID_THUMBNAIL_URL);
@@ -54,7 +54,7 @@ public class PlaylistCommandService {
 
         Playlist playlist = playlistRepository.save(
             Playlist.toEntity(code, requestDTO.playlistTitle(), requestDTO.playlistDescription(),
-                thumbnailUrl, willDeleteAt)
+                thumbnailUrl, lastLoginAt)
         );
 
         String accessToken = userCommandService.createPlaylistCreator(
