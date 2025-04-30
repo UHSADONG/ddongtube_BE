@@ -50,7 +50,7 @@ public class Playlist {
     private String thumbnailUrl;
 
     @Column(nullable = false)
-    private LocalDateTime willDeleteAt;
+    private LocalDateTime lastLoginAt;
 
     @CreatedDate
     @Column(updatable = false)
@@ -62,13 +62,13 @@ public class Playlist {
     private Video nowPlayVideo;
 
 
-    public static Playlist toEntity(String code, String title, String description, String thumbnailUrl ,LocalDateTime willDeleteAt) {
+    public static Playlist toEntity(String code, String title, String description, String thumbnailUrl ,LocalDateTime lastLoginAt) {
         return Playlist.builder()
             .code(code)
             .title(title)
             .description(description)
             .thumbnailUrl(thumbnailUrl)
-            .willDeleteAt(willDeleteAt)
+            .lastLoginAt(lastLoginAt)
             .build();
     }
 

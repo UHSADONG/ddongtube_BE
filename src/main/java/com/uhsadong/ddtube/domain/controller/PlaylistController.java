@@ -3,6 +3,7 @@ package com.uhsadong.ddtube.domain.controller;
 import com.uhsadong.ddtube.domain.dto.request.CreatePlaylistRequestDTO;
 import com.uhsadong.ddtube.domain.dto.response.CreatePlaylistResponseDTO;
 import com.uhsadong.ddtube.domain.dto.response.PlaylistDetailResponseDTO;
+import com.uhsadong.ddtube.domain.dto.response.PlaylistHealthResponseDTO;
 import com.uhsadong.ddtube.domain.dto.response.PlaylistMetaResponseDTO;
 import com.uhsadong.ddtube.domain.dto.response.PlaylistPublicMetaResponseDTO;
 import com.uhsadong.ddtube.domain.entity.User;
@@ -14,6 +15,7 @@ import com.uhsadong.ddtube.global.util.S3Util;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.validator.constraints.Length;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,6 +36,16 @@ public class PlaylistController {
     private final PlaylistCommandService playlistCommandService;
     private final S3Util s3Util;
     private final PlaylistQueryService playlistQueryService;
+
+    @GetMapping("/{playlistCode}/health")
+    @Operation(summary = "재생목록 상태 확인", description = "재생목록 상태 확인 기능입니다.")
+    public ResponseEntity<ApiResponse<PlaylistHealthResponseDTO>> checkPlaylistHealth(
+        @PathVariable String playlistCode
+    ) {
+        return ResponseEntity.ok(ApiResponse.onSuccess(
+            playlistQueryService.checkPlaylistHealth(playlistCode)
+        ));
+    }
 
     @GetMapping("/{playlistCode}")
     @Operation(summary = "재생목록 조회", description = "재생목록 조회 기능입니다.")

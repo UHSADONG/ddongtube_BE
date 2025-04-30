@@ -12,7 +12,7 @@ logging:
 ddtube:
   playlist:
     code_length: 5
-    delete_hours: 6
+    delete_days: 1 #  플레이이스트 활성화 1일 유지
     priority_step: 100_000_000_000_000
   user:
     code_length: 5
