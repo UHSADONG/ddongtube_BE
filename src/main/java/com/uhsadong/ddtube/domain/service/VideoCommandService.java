@@ -6,6 +6,7 @@ import com.uhsadong.ddtube.domain.entity.Playlist;
 import com.uhsadong.ddtube.domain.entity.User;
 import com.uhsadong.ddtube.domain.entity.Video;
 import com.uhsadong.ddtube.domain.repository.VideoRepository;
+import com.uhsadong.ddtube.domain.repositoryservice.PlaylistRepositoryService;
 import com.uhsadong.ddtube.global.response.code.status.ErrorStatus;
 import com.uhsadong.ddtube.global.response.exception.GeneralException;
 import com.uhsadong.ddtube.global.sse.SseService;
@@ -24,7 +25,7 @@ import org.springframework.stereotype.Service;
 public class VideoCommandService {
 
     private final VideoRepository videoRepository;
-    private final PlaylistQueryService playlistQueryService;
+    private final PlaylistRepositoryService playlistRepositoryService;
     private final UserQueryService userQueryService;
     private final SseService sseService;
     @Value("${ddtube.video.code_length}")
@@ -35,7 +36,7 @@ public class VideoCommandService {
     @Transactional
     public void addVideoToPlaylist(
         User user, String playlistCode, AddVideoToPlaylistRequestDTO requestDTO) {
-        Playlist playlist = playlistQueryService.getPlaylistByCodeOrThrow(playlistCode);
+        Playlist playlist = playlistRepositoryService.findByCodeOrThrow(playlistCode);
         userQueryService.checkUserInPlaylist(user, playlist);
 
         String code = IdGenerator.generateShortId(VIDEO_CODE_LENGTH);
@@ -56,7 +57,7 @@ public class VideoCommandService {
     @Transactional
     public void deleteVideoFromPlaylist(
         User user, String playlistCode, String videoCode) {
-        Playlist playlist = playlistQueryService.getPlaylistByCodeOrThrow(playlistCode);
+        Playlist playlist = playlistRepositoryService.findByCodeOrThrow(playlistCode);
         userQueryService.checkUserInPlaylist(user, playlist);
         Video video = videoRepository.findFirstByPlaylistCodeAndCode(playlist.getCode(), videoCode)
             .orElseThrow(() -> new GeneralException(ErrorStatus._VIDEO_NOT_FOUND));

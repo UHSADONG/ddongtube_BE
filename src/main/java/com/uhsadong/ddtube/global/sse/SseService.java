@@ -2,6 +2,7 @@ package com.uhsadong.ddtube.global.sse;
 
 import com.uhsadong.ddtube.domain.dto.UserSimpleDTO;
 import com.uhsadong.ddtube.domain.entity.Video;
+import com.uhsadong.ddtube.domain.repositoryservice.PlaylistRepositoryService;
 import com.uhsadong.ddtube.domain.service.VideoQueryService;
 import com.uhsadong.ddtube.global.response.code.status.ErrorStatus;
 import com.uhsadong.ddtube.global.response.exception.GeneralException;
@@ -28,6 +29,8 @@ public class SseService {
     private final VideoQueryService videoQueryService;
     private final Map<String, List<SseEmitter>> emitterMap = new ConcurrentHashMap<>();
 
+    private final PlaylistRepositoryService playlistRepositoryService;
+
     void add(String playlistCode, UserSimpleDTO userSimpleDTO, SseEmitter emitter) {
         if (!this.emitterMap.containsKey(playlistCode)) {
             this.emitterMap.put(playlistCode, new ArrayList<>());
@@ -49,16 +52,22 @@ public class SseService {
             .build();
         sendByEmitter(emitter, "connect", playlistCode, responseDTO); // 연결 완료 여부 반환
 
+        playlistRepositoryService.updateLastLoginAtToNowByPlaylistCode(playlistCode);
+
         log.info(
             "[    CONN] Playlist {} | User {} | Emitter {} | TotalConnect {}"
             , playlistCode, userSimpleDTO.userCode(), emitter,
             this.emitterMap.get(playlistCode).size());
         emitter.onCompletion(() -> {
                 this.emitterMap.get(playlistCode).remove(emitter);
+                int connSize = this.emitterMap.get(playlistCode).size();
                 log.info(
                     "[ DISCONN] COMPLETION | Playlist {} | User {} | Emitter {} | TotalConnect {}"
-                    , playlistCode, userSimpleDTO.userCode(), emitter,
-                    this.emitterMap.get(playlistCode).size());
+                    , playlistCode, userSimpleDTO.userCode(), emitter, connSize);
+                if (connSize <= 0) {
+                    this.emitterMap.remove(playlistCode);
+                }
+                playlistRepositoryService.updateLastLoginAtToNowByPlaylistCode(playlistCode);
             }
         );
         emitter.onTimeout(() -> {
@@ -137,20 +146,12 @@ public class SseService {
         List<SseEmitter> emitters = emitterMap.get(playlistCode);
         if (emitters != null) {
             for (SseEmitter emitter : new ArrayList<>(emitters)) {
-                try {
-                    emitter.send(SseEmitter.event()
-                        .name(event)
-                        .data(responseDTO));
-                } catch (Exception e) {
-                    emitter.completeWithError(e); // 연결 종료
-                    emitters.remove(emitter);
-                }
+                sendByEmitter(emitter, event, playlistCode, responseDTO);
             }
         }
     }
 
-    private void sendByEmitter(SseEmitter emitter, String event, String playlistCode,
-        Object responseDTO) {
+    private void sendByEmitter(SseEmitter emitter, String event, String playlistCode, Object responseDTO) {
         List<SseEmitter> emitters = emitterMap.get(playlistCode);
         try {
             emitter.send(SseEmitter.event()

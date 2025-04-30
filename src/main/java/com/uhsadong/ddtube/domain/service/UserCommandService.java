@@ -5,6 +5,7 @@ import com.uhsadong.ddtube.domain.dto.response.CreateUserResponseDTO;
 import com.uhsadong.ddtube.domain.entity.Playlist;
 import com.uhsadong.ddtube.domain.entity.User;
 import com.uhsadong.ddtube.domain.repository.UserRepository;
+import com.uhsadong.ddtube.domain.repositoryservice.PlaylistRepositoryService;
 import com.uhsadong.ddtube.global.response.code.status.ErrorStatus;
 import com.uhsadong.ddtube.global.response.exception.GeneralException;
 import com.uhsadong.ddtube.global.util.IdGenerator;
@@ -21,7 +22,7 @@ import org.springframework.stereotype.Service;
 public class UserCommandService {
 
     private final UserRepository userRepository;
-    private final PlaylistQueryService playlistQueryService;
+    private final PlaylistRepositoryService playlistRepositoryService;
     private final JwtUtil jwtUtil;
     private final PasswordEncoder passwordEncoder;
     @Value("${ddtube.user.code_length}")
@@ -71,7 +72,7 @@ public class UserCommandService {
      * 사용자 데이터가 존재하지 않을 때에는 회원가입을 시도한다.
      */
     private CreateUserResponseDTO signUp(String playlistCode, CreateUserRequestDTO requestDTO) {
-        Playlist playlist = playlistQueryService.getPlaylistByCodeOrThrow(playlistCode);
+        Playlist playlist = playlistRepositoryService.findByCodeOrThrow(playlistCode);
         String code = IdGenerator.generateShortId(USER_CODE_LENGTH);
         User user = userRepository.save(
             User.toEntity(playlist, code, requestDTO.name(),

@@ -8,7 +8,7 @@ import com.uhsadong.ddtube.domain.dto.response.VideoDetailResponseDTO;
 import com.uhsadong.ddtube.domain.entity.Playlist;
 import com.uhsadong.ddtube.domain.entity.User;
 import com.uhsadong.ddtube.domain.enums.PlaylistHealth;
-import com.uhsadong.ddtube.domain.repository.PlaylistRepository;
+import com.uhsadong.ddtube.domain.repositoryservice.PlaylistRepositoryService;
 import com.uhsadong.ddtube.global.response.code.status.ErrorStatus;
 import com.uhsadong.ddtube.global.response.exception.GeneralException;
 import java.time.LocalDateTime;
@@ -23,25 +23,16 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class PlaylistQueryService {
 
-    private final PlaylistRepository playlistRepository;
+    private final PlaylistRepositoryService playlistRepositoryService;
     private final UserQueryService userQueryService;
     private final VideoQueryService videoQueryService;
 
     @Value("${ddtube.playlist.delete_days}")
     private Integer PLAYLIST_DELETE_DAYS;
 
-    public Playlist getPlaylistByCodeOrThrow(String code) {
-        return playlistRepository.findFirstByCode(code)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._PLAYLIST_NOT_FOUND));
-    }
-
-    public Optional<Playlist> getPlaylistByCodeOptional(String code) {
-        return playlistRepository.findFirstByCode(code);
-    }
-
     @Transactional(readOnly = true)
     public PlaylistPublicMetaResponseDTO getPlaylistPublicMetaInformation(String playlistCode) {
-        Playlist playlist = getPlaylistByCodeOrThrow(playlistCode);
+        Playlist playlist = playlistRepositoryService.findByCodeOrThrow(playlistCode);
         return PlaylistPublicMetaResponseDTO.builder()
             .title(playlist.getTitle())
             .thumbnailUrl(playlist.getThumbnailUrl())
@@ -51,7 +42,7 @@ public class PlaylistQueryService {
 
     @Transactional(readOnly = true)
     public PlaylistMetaResponseDTO getPlaylistMetaInformation(User user, String playlistCode) {
-        Playlist playlist = getPlaylistByCodeOrThrow(playlistCode);
+        Playlist playlist = playlistRepositoryService.findByCodeOrThrow(playlistCode);
         userQueryService.checkUserInPlaylist(user, playlist);
         List<User> userList = userQueryService.getUserListByPlaylistCode(playlistCode);
 
@@ -77,7 +68,7 @@ public class PlaylistQueryService {
 
     @Transactional(readOnly = true)
     public PlaylistDetailResponseDTO getPlaylistDetail(User user, String playlistCode) {
-        Playlist playlist = getPlaylistByCodeOrThrow(playlistCode);
+        Playlist playlist = playlistRepositoryService.findByCodeOrThrow(playlistCode);
         userQueryService.checkUserInPlaylist(user, playlist);
 
         List<VideoDetailResponseDTO> videoResponseList = videoQueryService.getVideoDetailListByPlaylistCode(
@@ -98,7 +89,8 @@ public class PlaylistQueryService {
 
     @Transactional(readOnly = true)
     public PlaylistHealthResponseDTO checkPlaylistHealth(String playlistCode) {
-        Optional<Playlist> playlistOptional = getPlaylistByCodeOptional(playlistCode);
+        Optional<Playlist> playlistOptional = playlistRepositoryService.findByCodeOptional(
+            playlistCode);
 
         // 플레이리스트가 존재하지 않는 경우
         if (playlistOptional.isEmpty()) {
@@ -112,7 +104,7 @@ public class PlaylistQueryService {
         Playlist playlist = playlistOptional.get();
         PlaylistHealth health;
 
-        // 삭제 기준일을 지난 경우 INACTIVE 상태
+        // 마지막으로 활성화된 시간 기준으로 PLAYLIST_DELETE_DAYS가 지났으면 INACTIVE 상태
         if (playlist.getLastLoginAt().plusDays(PLAYLIST_DELETE_DAYS)
             .isBefore(LocalDateTime.now())) {
             health = PlaylistHealth.INACTIVE;
