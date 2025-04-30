@@ -5,7 +5,7 @@ import com.uhsadong.ddtube.domain.dto.response.CreatePlaylistResponseDTO;
 import com.uhsadong.ddtube.domain.entity.Playlist;
 import com.uhsadong.ddtube.domain.entity.User;
 import com.uhsadong.ddtube.domain.entity.Video;
-import com.uhsadong.ddtube.domain.repository.PlaylistRepository;
+import com.uhsadong.ddtube.domain.repositoryservice.PlaylistRepositoryService;
 import com.uhsadong.ddtube.global.response.code.status.ErrorStatus;
 import com.uhsadong.ddtube.global.response.exception.GeneralException;
 import com.uhsadong.ddtube.global.sse.SseService;
@@ -13,7 +13,6 @@ import com.uhsadong.ddtube.global.util.IdGenerator;
 import com.uhsadong.ddtube.global.util.S3Util;
 import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -22,12 +21,12 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class PlaylistCommandService {
 
-    private final PlaylistRepository playlistRepository;
     private final UserCommandService userCommandService;
     private final S3Util s3Util;
     private final UserQueryService userQueryService;
     private final VideoQueryService videoQueryService;
     private final SseService sseService;
+    private final PlaylistRepositoryService playlistRepositoryService;
 
     @Value("${ddtube.playlist.code_length}")
     private Integer PLAYLIST_CODE_LENGTH;
@@ -51,7 +50,7 @@ public class PlaylistCommandService {
         String thumbnailUrl = requestDTO.thumbnailUrl().isEmpty()
             ? defaultThumbnailUrl : requestDTO.thumbnailUrl();
 
-        Playlist playlist = playlistRepository.save(
+        Playlist playlist = playlistRepositoryService.save(
             Playlist.toEntity(code, requestDTO.playlistTitle(), requestDTO.playlistDescription(),
                 thumbnailUrl, lastLoginAt)
         );
@@ -68,20 +67,18 @@ public class PlaylistCommandService {
 
     @Transactional
     public void deletePlaylist(User user, String playlistCode) {
-        Playlist playlist = playlistRepository.findFirstByCode(playlistCode)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._PLAYLIST_NOT_FOUND));
+        Playlist playlist = playlistRepositoryService.findByCodeOrThrow(playlistCode);
         userQueryService.checkUserInPlaylist(user, playlist);
         if (!user.isAdmin()) {
             throw new GeneralException(ErrorStatus._PLAYLIST_DELETE_PERMISSION_DENIED);
         }
-        playlistRepository.delete(playlist);
+        playlistRepositoryService.delete(playlist);
     }
 
     @Transactional
     public void setNowPlayingVideo(User user, String playlistCode, String videoCode,
         Boolean autoPlay) {
-        Playlist playlist = playlistRepository.findFirstByCode(playlistCode)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._PLAYLIST_NOT_FOUND));
+        Playlist playlist = playlistRepositoryService.findByCodeOrThrow(playlistCode);
         userQueryService.checkUserInPlaylist(user, playlist);
         Video video = videoQueryService.getVideoByCodeOrThrow(videoCode);
         if (playlist.getNowPlayVideo() != null && video.getId()
@@ -94,13 +91,6 @@ public class PlaylistCommandService {
         playlist.setNowPlayVideo(video);
 
         sseService.sendNowPlayingVideoEventToClients(playlistCode, video, user.getName(), autoPlay);
-
-    }
-
-    @Transactional
-    public int updatePlaylistLastLoginAt(Set<String> playlistCodeSet) {
-        return playlistRepository.updateLastLoginAtByPlaylistCodeIn(playlistCodeSet,
-            LocalDateTime.now());
 
     }
 

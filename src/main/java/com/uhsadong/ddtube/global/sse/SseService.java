@@ -2,6 +2,7 @@ package com.uhsadong.ddtube.global.sse;
 
 import com.uhsadong.ddtube.domain.dto.UserSimpleDTO;
 import com.uhsadong.ddtube.domain.entity.Video;
+import com.uhsadong.ddtube.domain.repositoryservice.PlaylistRepositoryService;
 import com.uhsadong.ddtube.domain.service.VideoQueryService;
 import com.uhsadong.ddtube.global.response.code.status.ErrorStatus;
 import com.uhsadong.ddtube.global.response.exception.GeneralException;
@@ -14,7 +15,6 @@ import com.uhsadong.ddtube.global.sse.dto.UpdateVideoSseResponseDTO;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +28,8 @@ public class SseService {
 
     private final VideoQueryService videoQueryService;
     private final Map<String, List<SseEmitter>> emitterMap = new ConcurrentHashMap<>();
+
+    private final PlaylistRepositoryService playlistRepositoryService;
 
     void add(String playlistCode, UserSimpleDTO userSimpleDTO, SseEmitter emitter) {
         if (!this.emitterMap.containsKey(playlistCode)) {
@@ -50,6 +52,8 @@ public class SseService {
             .build();
         sendByEmitter(emitter, "connect", playlistCode, responseDTO); // 연결 완료 여부 반환
 
+        playlistRepositoryService.updateLastLoginAtToNowByPlaylistCode(playlistCode);
+
         log.info(
             "[    CONN] Playlist {} | User {} | Emitter {} | TotalConnect {}"
             , playlistCode, userSimpleDTO.userCode(), emitter,
@@ -63,6 +67,7 @@ public class SseService {
                 if (connSize <= 0) {
                     this.emitterMap.remove(playlistCode);
                 }
+                playlistRepositoryService.updateLastLoginAtToNowByPlaylistCode(playlistCode);
             }
         );
         emitter.onTimeout(() -> {
@@ -118,7 +123,7 @@ public class SseService {
         sendByPlaylistCode("playing", playlistCode, responseDTO);
     }
 
-    public Set<String> sendPingWithConnectionCount() {
+    public void sendPingWithConnectionCount() {
         for (Map.Entry<String, List<SseEmitter>> entry : emitterMap.entrySet()) {
             List<SseEmitter> emitters = entry.getValue();
             ConnectionCountSseResponseDTO responseDTO = ConnectionCountSseResponseDTO.builder()
@@ -135,29 +140,18 @@ public class SseService {
                 }
             }
         }
-
-        return this.emitterMap.keySet();
-
     }
 
     private void sendByPlaylistCode(String event, String playlistCode, Object responseDTO) {
         List<SseEmitter> emitters = emitterMap.get(playlistCode);
         if (emitters != null) {
             for (SseEmitter emitter : new ArrayList<>(emitters)) {
-                try {
-                    emitter.send(SseEmitter.event()
-                        .name(event)
-                        .data(responseDTO));
-                } catch (Exception e) {
-                    emitter.completeWithError(e); // 연결 종료
-                    emitters.remove(emitter);
-                }
+                sendByEmitter(emitter, event, playlistCode, responseDTO);
             }
         }
     }
 
-    private void sendByEmitter(SseEmitter emitter, String event, String playlistCode,
-        Object responseDTO) {
+    private void sendByEmitter(SseEmitter emitter, String event, String playlistCode, Object responseDTO) {
         List<SseEmitter> emitters = emitterMap.get(playlistCode);
         try {
             emitter.send(SseEmitter.event()
