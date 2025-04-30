@@ -14,6 +14,7 @@ import com.uhsadong.ddtube.global.sse.dto.UpdateVideoSseResponseDTO;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -55,10 +56,13 @@ public class SseService {
             this.emitterMap.get(playlistCode).size());
         emitter.onCompletion(() -> {
                 this.emitterMap.get(playlistCode).remove(emitter);
+                int connSize = this.emitterMap.get(playlistCode).size();
                 log.info(
                     "[ DISCONN] COMPLETION | Playlist {} | User {} | Emitter {} | TotalConnect {}"
-                    , playlistCode, userSimpleDTO.userCode(), emitter,
-                    this.emitterMap.get(playlistCode).size());
+                    , playlistCode, userSimpleDTO.userCode(), emitter, connSize);
+                if (connSize <= 0) {
+                    this.emitterMap.remove(playlistCode);
+                }
             }
         );
         emitter.onTimeout(() -> {
@@ -114,7 +118,7 @@ public class SseService {
         sendByPlaylistCode("playing", playlistCode, responseDTO);
     }
 
-    public void sendPingWithConnectionCount() {
+    public Set<String> sendPingWithConnectionCount() {
         for (Map.Entry<String, List<SseEmitter>> entry : emitterMap.entrySet()) {
             List<SseEmitter> emitters = entry.getValue();
             ConnectionCountSseResponseDTO responseDTO = ConnectionCountSseResponseDTO.builder()
@@ -131,6 +135,9 @@ public class SseService {
                 }
             }
         }
+
+        return this.emitterMap.keySet();
+
     }
 
     private void sendByPlaylistCode(String event, String playlistCode, Object responseDTO) {

@@ -112,7 +112,7 @@ public class PlaylistQueryService {
         Playlist playlist = playlistOptional.get();
         PlaylistHealth health;
 
-        // 삭제 기준일을 지난 경우 INACTIVE 상태
+        // 마지막으로 활성화된 시간 기준으로 PLAYLIST_DELETE_DAYS가 지났으면 INACTIVE 상태
         if (playlist.getLastLoginAt().plusDays(PLAYLIST_DELETE_DAYS)
             .isBefore(LocalDateTime.now())) {
             health = PlaylistHealth.INACTIVE;

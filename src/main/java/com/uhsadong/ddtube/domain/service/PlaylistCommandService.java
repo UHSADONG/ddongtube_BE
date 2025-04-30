@@ -13,6 +13,7 @@ import com.uhsadong.ddtube.global.util.IdGenerator;
 import com.uhsadong.ddtube.global.util.S3Util;
 import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -30,8 +31,6 @@ public class PlaylistCommandService {
 
     @Value("${ddtube.playlist.code_length}")
     private Integer PLAYLIST_CODE_LENGTH;
-    @Value("${ddtube.playlist.delete_days}")
-    private Integer PLAYLIST_DELETE_DAYS;
 
     @Value("${aws.s3.default-thumbneil-url}")
     private String defaultThumbnailUrl;
@@ -44,7 +43,7 @@ public class PlaylistCommandService {
         CreatePlaylistRequestDTO requestDTO
     ) {
         String code = IdGenerator.generateShortId(PLAYLIST_CODE_LENGTH);
-        LocalDateTime lastLoginAt = LocalDateTime.now().plusDays(PLAYLIST_DELETE_DAYS);
+        LocalDateTime lastLoginAt = LocalDateTime.now();
 
         if (!(s3Util.isS3Url(requestDTO.thumbnailUrl()) || requestDTO.thumbnailUrl().isEmpty())) {
             throw new GeneralException(ErrorStatus._INVALID_THUMBNAIL_URL);
@@ -95,6 +94,13 @@ public class PlaylistCommandService {
         playlist.setNowPlayVideo(video);
 
         sseService.sendNowPlayingVideoEventToClients(playlistCode, video, user.getName(), autoPlay);
+
+    }
+
+    @Transactional
+    public int updatePlaylistLastLoginAt(Set<String> playlistCodeSet) {
+        return playlistRepository.updateLastLoginAtByPlaylistCodeIn(playlistCodeSet,
+            LocalDateTime.now());
 
     }
 
