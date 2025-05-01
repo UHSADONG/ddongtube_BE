@@ -1,6 +1,7 @@
 package com.uhsadong.ddtube.domain.controller;
 
 import com.uhsadong.ddtube.domain.dto.request.AddVideoToPlaylistRequestDTO;
+import com.uhsadong.ddtube.domain.dto.response.MoveVideoResponseDTO;
 import com.uhsadong.ddtube.domain.entity.User;
 import com.uhsadong.ddtube.domain.service.VideoCommandService;
 import com.uhsadong.ddtube.global.response.ApiResponse;
@@ -10,10 +11,12 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -43,6 +46,21 @@ public class VideoController {
     ) {
         videoCommandService.deleteVideoFromPlaylist(user, playlistCode, videoCode);
         return ResponseEntity.ok(ApiResponse.onSuccess(playlistCode));
+    }
+
+    @PatchMapping("/{playlistCode}/{videoCode}/priority")
+    @Operation(summary = "재생목록 영상 우선순위 변경", description = "재생목록 영상 우선순위 변경 기능입니다. \n어떤 플레이리스트(playlistCode)에, \n어떤 영상(videoCode)을 \n어떤 영상(targetVideoCode)의 \n전후(positionBefore)로 이동시킬지 결정")
+    public ResponseEntity<ApiResponse<MoveVideoResponseDTO>> updateVideoPriority(
+        @CurrentUser User user,
+        @PathVariable String playlistCode,
+        @PathVariable String videoCode,
+        @RequestParam String targetVideoCode,
+        @RequestParam Boolean positionBefore
+    ) {
+
+        return ResponseEntity.ok(ApiResponse.onSuccess(
+            videoCommandService.moveVideo(user, playlistCode, videoCode, targetVideoCode,
+                positionBefore)));
     }
 
 }

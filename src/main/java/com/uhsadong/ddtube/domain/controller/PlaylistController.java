@@ -9,6 +9,7 @@ import com.uhsadong.ddtube.domain.dto.response.PlaylistPublicMetaResponseDTO;
 import com.uhsadong.ddtube.domain.entity.User;
 import com.uhsadong.ddtube.domain.service.PlaylistCommandService;
 import com.uhsadong.ddtube.domain.service.PlaylistQueryService;
+import com.uhsadong.ddtube.domain.service.VideoCommandService;
 import com.uhsadong.ddtube.global.response.ApiResponse;
 import com.uhsadong.ddtube.global.security.CurrentUser;
 import com.uhsadong.ddtube.global.util.S3Util;
@@ -18,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -35,6 +37,7 @@ public class PlaylistController {
     private final PlaylistCommandService playlistCommandService;
     private final S3Util s3Util;
     private final PlaylistQueryService playlistQueryService;
+    private final VideoCommandService videoCommandService;
 
     @GetMapping("/{playlistCode}/health")
     @Operation(summary = "재생목록 상태 확인", description = "재생목록 상태 확인 기능입니다.")

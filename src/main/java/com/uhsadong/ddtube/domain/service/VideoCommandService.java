@@ -2,6 +2,7 @@ package com.uhsadong.ddtube.domain.service;
 
 import com.uhsadong.ddtube.domain.dto.YoutubeOEmbedDTO;
 import com.uhsadong.ddtube.domain.dto.request.AddVideoToPlaylistRequestDTO;
+import com.uhsadong.ddtube.domain.dto.response.MoveVideoResponseDTO;
 import com.uhsadong.ddtube.domain.entity.Playlist;
 import com.uhsadong.ddtube.domain.entity.User;
 import com.uhsadong.ddtube.domain.entity.Video;
@@ -13,11 +14,14 @@ import com.uhsadong.ddtube.global.sse.SseService;
 import com.uhsadong.ddtube.global.sse.SseStatus;
 import com.uhsadong.ddtube.global.util.IdGenerator;
 import com.uhsadong.ddtube.global.util.YoutubeOEmbed;
-import jakarta.transaction.Transactional;
+import jakarta.persistence.OptimisticLockException;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -74,4 +78,76 @@ public class VideoCommandService {
         sseService.sendVideoEventToClients(playlistCode, video, SseStatus.DELETE);
     }
 
+    public MoveVideoResponseDTO moveVideo(User user, String playlistCode, String videoCode,
+        String targetVideoCode, boolean positionBefore) {
+
+        // 이동할 위치에 있는 영상
+        Video targetVideo = videoRepository.findFirstByPlaylistCodeAndCode(playlistCode,
+                targetVideoCode)
+            .orElseThrow(() -> new GeneralException(ErrorStatus._VIDEO_NOT_FOUND));
+
+        Long priorityToChange;
+        if (positionBefore) {
+            // targetVideoCode 앞에 위치
+            Optional<Video> beforeTargetVideoOpt = videoRepository.findPreviousVideoExcept(
+                playlistCode, targetVideo.getPriority(), videoCode);
+
+            // 앞 비디오가 있으면 중간값 계산, 없으면 targetVideo보다 앞에 위치
+            Long prevPriority = beforeTargetVideoOpt.map(Video::getPriority).orElse(null);
+            priorityToChange = calculatePriority(prevPriority, targetVideo.getPriority());
+
+        } else {
+            // targetVideoCode 뒤에 위치
+            Optional<Video> afterTargetVideoOpt = videoRepository.findNextVideoExcept(
+                playlistCode, targetVideo.getPriority(), videoCode);
+
+            // 뒤 비디오가 있으면 중간값 계산, 없으면 targetVideo보다 뒤에 위치
+            Long nextPriority = afterTargetVideoOpt.map(Video::getPriority).orElse(null);
+            priorityToChange = calculatePriority(targetVideo.getPriority(), nextPriority);
+        }
+
+        return updateVideoPriorityWithCheck(playlistCode, videoCode, priorityToChange);
+    }
+
+    // 우선순위 중복 확인 및 업데이트를 위한 별도 트랜잭션
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    public MoveVideoResponseDTO updateVideoPriorityWithCheck(String playlistCode, String videoCode,
+        Long newPriority) {
+
+        Video videoToMove = videoRepository.findFirstByPlaylistCodeAndCode(playlistCode,
+                videoCode)
+            .orElseThrow(() -> new GeneralException(ErrorStatus._VIDEO_NOT_FOUND));
+
+        Long oldPriority = videoToMove.getPriority();
+
+        try {
+            // 우선순위 업데이트
+            videoToMove.updatePriority(newPriority);
+            videoRepository.save(videoToMove);
+
+            // SSE 이벤트 전송
+            sseService.sendVideoEventToClients(playlistCode, videoToMove, SseStatus.MOVE);
+
+            return MoveVideoResponseDTO.builder()
+                .conflict(false)
+                .videoCode(videoCode)
+                .newPriority(newPriority)
+                .oldPriority(oldPriority)
+                .build();
+
+        } catch (OptimisticLockException e) {
+            throw new GeneralException(ErrorStatus._VIDEO_MOVE_CONFLICT);
+        }
+    }
+
+    // 우선순위 계산 함수 분리
+    private Long calculatePriority(Long prevPriority, Long nextPriority) {
+        if (nextPriority == null) {
+            return prevPriority + PRIORITY_STEP; // 마지막 위치
+        } else if (prevPriority == null) {
+            return nextPriority / 2; // 첫 위치
+        } else {
+            return prevPriority + (nextPriority - prevPriority) / 2; // 중간 위치
+        }
+    }
 }
