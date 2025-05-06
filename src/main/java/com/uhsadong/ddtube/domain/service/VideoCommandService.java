@@ -78,8 +78,16 @@ public class VideoCommandService {
         sseService.sendVideoEventToClients(playlistCode, video, SseStatus.DELETE);
     }
 
+    @Transactional(readOnly = true)
     public MoveVideoResponseDTO moveVideo(User user, String playlistCode, String videoCode,
         String targetVideoCode, boolean positionBefore) {
+        if (!user.isAdmin()) {
+            throw new GeneralException(ErrorStatus._USER_NOT_ADMIN);
+        }
+
+        if (videoCode.equals(targetVideoCode)) {
+            throw new GeneralException(ErrorStatus._TARGET_VIDEO_IS_SAME);
+        }
 
         // 이동할 위치에 있는 영상
         Video targetVideo = videoRepository.findFirstByPlaylistCodeAndCode(playlistCode,
@@ -106,7 +114,15 @@ public class VideoCommandService {
             priorityToChange = calculatePriority(targetVideo.getPriority(), nextPriority);
         }
 
-        return updateVideoPriorityWithCheck(playlistCode, videoCode, priorityToChange);
+        // Self Inject 방식으로 Transactional 문제 해결
+        MoveVideoResponseDTO moveVideoResponseDTO = updateVideoPriorityWithCheck(
+            playlistCode, videoCode, priorityToChange);
+
+        // updateVideoPriorityWithCheck에서 변경한 videoToMove를 다시 가져옴
+        Video movedVideo = videoRepository.findFirstByPlaylistCodeAndCode(playlistCode, videoCode)
+            .orElseThrow(() -> new GeneralException(ErrorStatus._VIDEO_NOT_FOUND));
+        sseService.sendVideoEventToClients(playlistCode, movedVideo, SseStatus.MOVE);
+        return moveVideoResponseDTO;
     }
 
     // 우선순위 중복 확인 및 업데이트를 위한 별도 트랜잭션
@@ -124,9 +140,6 @@ public class VideoCommandService {
             // 우선순위 업데이트
             videoToMove.updatePriority(newPriority);
             videoRepository.save(videoToMove);
-
-            // SSE 이벤트 전송
-            sseService.sendVideoEventToClients(playlistCode, videoToMove, SseStatus.MOVE);
 
             return MoveVideoResponseDTO.builder()
                 .conflict(false)

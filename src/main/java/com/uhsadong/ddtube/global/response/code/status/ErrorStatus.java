@@ -41,6 +41,7 @@ public enum ErrorStatus implements BaseErrorCode {
     _USER_NOT_FOUND(HttpStatus.BAD_REQUEST, "USER002", "해당 사용자를 찾을 수 없습니다."),
     _CREATOR_NOT_FOUND(HttpStatus.BAD_REQUEST, "USER003", "해당 플레이리스트의 생성자를 찾을 수 없습니다."),
     _USER_NOT_IN_PLAYLIST(HttpStatus.BAD_REQUEST, "USER004", "해당 사용자는 해당 플레이리스트에 속해있지 않습니다."),
+    _USER_NOT_ADMIN(HttpStatus.BAD_REQUEST, "USER005", "해당 사용자는 관리자 권한이 없습니다."),
 
     // VIDEO
     _VIDEO_NOT_FOUND(HttpStatus.BAD_REQUEST, "VIDEO001", "해당 비디오를 찾을 수 없습니다."),
@@ -48,6 +49,7 @@ public enum ErrorStatus implements BaseErrorCode {
     _VIDEO_NOT_IN_PLAYLIST(HttpStatus.BAD_REQUEST, "VIDEO003", "해당 비디오는 해당 플레이리스트에 속해있지 않습니다."),
     _CANNOT_DELETE_NOW_PLAY_VIDEO(HttpStatus.BAD_REQUEST, "VIDEO004", "현재 재생중인 비디오는 삭제할 수 없습니다."),
     _VIDEO_MOVE_CONFLICT(HttpStatus.BAD_REQUEST, "VIDEO005", "비디오 이동 중 충돌이 발생했습니다."),
+    _TARGET_VIDEO_IS_SAME(HttpStatus.BAD_REQUEST, "VIDEO006", "같은 비디오입니다."),
 
     // YOUTUBE
     _YOUTUBE_OEMBED_BAD_REQUEST(HttpStatus.BAD_REQUEST, "YOUTUBE001", "가져올 수 없는 영상입니다."),
