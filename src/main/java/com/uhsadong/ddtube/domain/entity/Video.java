@@ -11,6 +11,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import jakarta.validation.constraints.Positive;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
@@ -51,6 +52,8 @@ public class Video {
 
     @Positive
     private Long priority; // 재생목록 내 순서
+    @Version
+    private Long version; // 낙관적 락
 
     @Length(max = 255)
     @Column(nullable = false, length = 255)
@@ -91,6 +94,10 @@ public class Video {
             .thumbnailHeight(Integer.valueOf(youtubeInfo.thumbnail_height()))
             .thumbnailWidth(Integer.valueOf(youtubeInfo.thumbnail_width()))
             .build();
+    }
+
+    public void updatePriority(Long priority) {
+        this.priority = priority;
     }
 
 }
