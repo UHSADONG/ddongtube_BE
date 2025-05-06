@@ -78,7 +78,6 @@ public class VideoCommandService {
         sseService.sendVideoEventToClients(playlistCode, video, SseStatus.DELETE);
     }
 
-    @Transactional(readOnly = true)
     public MoveVideoResponseDTO moveVideo(User user, String playlistCode, String videoCode,
         String targetVideoCode, boolean positionBefore) {
         if (!user.isAdmin()) {
@@ -114,7 +113,6 @@ public class VideoCommandService {
             priorityToChange = calculatePriority(targetVideo.getPriority(), nextPriority);
         }
 
-        // Self Inject 방식으로 Transactional 문제 해결
         MoveVideoResponseDTO moveVideoResponseDTO = updateVideoPriorityWithCheck(
             playlistCode, videoCode, priorityToChange);
 

@@ -4,9 +4,12 @@ import com.uhsadong.ddtube.global.logger.enums.MdcKey;
 import com.uhsadong.ddtube.global.response.ApiResponse;
 import com.uhsadong.ddtube.global.response.code.ErrorReasonDto;
 import com.uhsadong.ddtube.global.response.code.status.ErrorStatus;
+import io.sentry.Sentry;
+import io.sentry.SentryLevel;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -76,6 +79,24 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
             : e.getStackTrace()[0].toString();
         log.error("[   ERROR] rid {} | {} | {}", MDC.get(MdcKey.REQUEST_ID.name()),
             errorMessage, errorPoint);
+
+        Sentry.withScope(scope -> {
+            scope.setTag("handled", "no");
+            scope.setTag("status_code",
+                ErrorStatus._INTERNAL_SERVER_ERROR.getHttpStatus().toString());
+            scope.setTag("user_id", MDC.get(MdcKey.USER_ID.name()));
+            scope.setExtra("location", errorPoint);
+            scope.setExtra("message", errorMessage);
+            scope.setLevel(SentryLevel.FATAL);
+            // 500번대 Fingerprint 설정 요청 API 메소드 + 경로 + 사용자 ID (FATAL이기 때문에)
+            scope.setFingerprint(List.of("FATAL",
+                MDC.get(MdcKey.REQUEST_METHOD.name()),
+                MDC.get(MdcKey.REQUEST_URI.name()),
+                MDC.get(MdcKey.USER_ID.name())
+            ));
+            Sentry.captureException(e);
+        });
+
         return handleExceptionInternalFalse(e, ErrorStatus._INTERNAL_SERVER_ERROR,
             HttpHeaders.EMPTY, ErrorStatus._INTERNAL_SERVER_ERROR.getHttpStatus(), request,
             e.getMessage());
@@ -89,6 +110,27 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
         log.info("[   ERROR] rid {} | {} | {}", MDC.get(MdcKey.REQUEST_ID.name()),
             generalException.getErrorReasonHttpStatus().getCode(),
             generalException.getErrorReasonHttpStatus().getMessage());
+
+        Sentry.withScope(scope -> {
+            GeneralException newGeneralException = new GeneralException(
+                generalException.getErrorReasonHttpStatus().getMessage(), // 메시지
+                generalException.getCode() // 코드
+            );
+
+            scope.setTag("handled", "yes");
+            scope.setTag("status_code", generalException.getErrorReasonHttpStatus().getCode());
+            scope.setTag("user_id", MDC.get(MdcKey.USER_ID.name()));
+            scope.setExtra("message", generalException.getErrorReasonHttpStatus().getMessage());
+            scope.setLevel(SentryLevel.WARNING);
+            // 400번대 Fingerprint 설정 요청 API 메소드 + 경로 (사용자별로 구분할 필요 없음)
+            scope.setFingerprint(List.of("WARN",
+                MDC.get(MdcKey.REQUEST_METHOD.name()),
+                MDC.get(MdcKey.REQUEST_URI.name()),
+                generalException.getErrorReasonHttpStatus().getCode()
+            ));
+
+            Sentry.captureException(newGeneralException);
+        });
 
         ErrorReasonDto errorReasonHttpStatus = generalException.getErrorReasonHttpStatus();
         return handleExceptionInternal(generalException, errorReasonHttpStatus, null, request);

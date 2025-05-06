@@ -50,6 +50,9 @@ dependencies {
     // AWS - S3
     implementation 'software.amazon.awssdk:s3:2.31.11'
 
+    // Sentry
+    implementation 'io.sentry:sentry-spring-boot-starter-jakarta:8.11.1'
+    implementation 'io.sentry:sentry-jdbc:8.11.1'
 }
 
 tasks.named('test') {
