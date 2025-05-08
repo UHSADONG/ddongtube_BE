@@ -6,11 +6,10 @@ import com.uhsadong.ddtube.domain.entity.Playlist;
 import com.uhsadong.ddtube.domain.entity.User;
 import com.uhsadong.ddtube.domain.entity.Video;
 import com.uhsadong.ddtube.domain.repositoryservice.PlaylistRepositoryService;
-import com.uhsadong.ddtube.global.response.code.status.ErrorStatus;
-import com.uhsadong.ddtube.global.response.exception.GeneralException;
+import com.uhsadong.ddtube.domain.validator.PlaylistValidator;
+import com.uhsadong.ddtube.domain.validator.UserValidator;
 import com.uhsadong.ddtube.global.sse.SseService;
 import com.uhsadong.ddtube.global.util.IdGenerator;
-import com.uhsadong.ddtube.global.util.S3Util;
 import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
@@ -22,11 +21,11 @@ import org.springframework.stereotype.Service;
 public class PlaylistCommandService {
 
     private final UserCommandService userCommandService;
-    private final S3Util s3Util;
-    private final UserQueryService userQueryService;
     private final VideoQueryService videoQueryService;
     private final SseService sseService;
     private final PlaylistRepositoryService playlistRepositoryService;
+    private final PlaylistValidator playlistValidator;
+    private final UserValidator userValidator;
 
     @Value("${ddtube.playlist.code_length}")
     private Integer PLAYLIST_CODE_LENGTH;
@@ -44,9 +43,9 @@ public class PlaylistCommandService {
         String code = IdGenerator.generateShortId(PLAYLIST_CODE_LENGTH);
         LocalDateTime lastLoginAt = LocalDateTime.now();
 
-        if (!(s3Util.isS3Url(requestDTO.thumbnailUrl()) || requestDTO.thumbnailUrl().isEmpty())) {
-            throw new GeneralException(ErrorStatus._INVALID_THUMBNAIL_URL);
-        }
+        // 썸네일 URL 검증
+        playlistValidator.checkThumbnailUrl(requestDTO.thumbnailUrl());
+
         String thumbnailUrl = requestDTO.thumbnailUrl().isEmpty()
             ? defaultThumbnailUrl : requestDTO.thumbnailUrl();
 
@@ -68,10 +67,10 @@ public class PlaylistCommandService {
     @Transactional
     public void deletePlaylist(User user, String playlistCode) {
         Playlist playlist = playlistRepositoryService.findByCodeOrThrow(playlistCode);
-        userQueryService.checkUserInPlaylist(user, playlist);
-        if (!user.isAdmin()) {
-            throw new GeneralException(ErrorStatus._PLAYLIST_DELETE_PERMISSION_DENIED);
-        }
+        userValidator.checkUserInPlaylist(user, playlist);
+
+        userValidator.checkUserIsAdminOfPlaylist(playlist, user);
+
         playlistRepositoryService.delete(playlist);
     }
 
@@ -79,15 +78,15 @@ public class PlaylistCommandService {
     public void setNowPlayingVideo(User user, String playlistCode, String videoCode,
         Boolean autoPlay) {
         Playlist playlist = playlistRepositoryService.findByCodeOrThrow(playlistCode);
-        userQueryService.checkUserInPlaylist(user, playlist);
+        userValidator.checkUserInPlaylist(user, playlist);
         Video video = videoQueryService.getVideoByCodeOrThrow(videoCode);
         if (playlist.getNowPlayVideo() != null && video.getId()
             .equals(playlist.getNowPlayVideo().getId())) {
             return;
         }
-        if (!playlist.getId().equals(video.getPlaylist().getId())) {
-            throw new GeneralException(ErrorStatus._VIDEO_NOT_IN_PLAYLIST);
-        }
+
+        playlistValidator.checkVideoInPlaylist(playlist, video);
+
         playlist.setNowPlayVideo(video);
 
         sseService.sendNowPlayingVideoEventToClients(playlistCode, video, user.getName(), autoPlay);

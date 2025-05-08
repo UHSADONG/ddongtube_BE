@@ -19,9 +19,5 @@ public class UserQueryService {
         return userRepository.findAllByPlaylistCode(playlistCode);
     }
 
-    public void checkUserInPlaylist(User user, Playlist playlist) {
-        if (!user.getPlaylist().getId().equals(playlist.getId())) {
-            throw new GeneralException(ErrorStatus._USER_NOT_IN_PLAYLIST);
-        }
-    }
+
 }

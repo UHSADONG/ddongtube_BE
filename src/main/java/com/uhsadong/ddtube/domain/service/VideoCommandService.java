@@ -8,6 +8,8 @@ import com.uhsadong.ddtube.domain.entity.User;
 import com.uhsadong.ddtube.domain.entity.Video;
 import com.uhsadong.ddtube.domain.repository.VideoRepository;
 import com.uhsadong.ddtube.domain.repositoryservice.PlaylistRepositoryService;
+import com.uhsadong.ddtube.domain.validator.UserValidator;
+import com.uhsadong.ddtube.domain.validator.VideoValidator;
 import com.uhsadong.ddtube.global.response.code.status.ErrorStatus;
 import com.uhsadong.ddtube.global.response.exception.GeneralException;
 import com.uhsadong.ddtube.global.sse.SseService;
@@ -30,7 +32,8 @@ public class VideoCommandService {
 
     private final VideoRepository videoRepository;
     private final PlaylistRepositoryService playlistRepositoryService;
-    private final UserQueryService userQueryService;
+    private final UserValidator userValidator;
+    private final VideoValidator videoValidator;
     private final SseService sseService;
     @Value("${ddtube.video.code_length}")
     private int VIDEO_CODE_LENGTH;
@@ -41,7 +44,7 @@ public class VideoCommandService {
     public void addVideoToPlaylist(
         User user, String playlistCode, AddVideoToPlaylistRequestDTO requestDTO) {
         Playlist playlist = playlistRepositoryService.findByCodeOrThrow(playlistCode);
-        userQueryService.checkUserInPlaylist(user, playlist);
+        userValidator.checkUserInPlaylist(user, playlist);
 
         String code = IdGenerator.generateShortId(VIDEO_CODE_LENGTH);
         YoutubeOEmbedDTO youtubeOEmbedDTO = YoutubeOEmbed.getVideoInfo(requestDTO.videoUrl());
@@ -62,17 +65,12 @@ public class VideoCommandService {
     public void deleteVideoFromPlaylist(
         User user, String playlistCode, String videoCode) {
         Playlist playlist = playlistRepositoryService.findByCodeOrThrow(playlistCode);
-        userQueryService.checkUserInPlaylist(user, playlist);
+        userValidator.checkUserInPlaylist(user, playlist);
         Video video = videoRepository.findFirstByPlaylistCodeAndCode(playlist.getCode(), videoCode)
             .orElseThrow(() -> new GeneralException(ErrorStatus._VIDEO_NOT_FOUND));
         // 영상을 추가한 사람이거나 플레이리스트의 관리자가 아니면 에러
-        if (!(video.getUser().getId().equals(user.getId()) || user.isAdmin())) {
-            throw new GeneralException(ErrorStatus._VIDEO_DELETE_PERMISSION_DENIED);
-        }
-        if (playlist.getNowPlayVideo() != null && video.getId()
-            .equals(playlist.getNowPlayVideo().getId())) {
-            throw new GeneralException(ErrorStatus._CANNOT_DELETE_NOW_PLAY_VIDEO);
-        }
+        videoValidator.checkPermissionOfVideoUpdate(playlist, video, user);
+        videoValidator.checkVideoIsNowPlayingInPlaylist(playlist, video);
 
         videoRepository.delete(video);
         sseService.sendVideoEventToClients(playlistCode, video, SseStatus.DELETE);
@@ -80,13 +78,11 @@ public class VideoCommandService {
 
     public MoveVideoResponseDTO moveVideo(User user, String playlistCode, String videoCode,
         String targetVideoCode, boolean positionBefore) {
-        if (!user.isAdmin()) {
-            throw new GeneralException(ErrorStatus._USER_NOT_ADMIN);
-        }
 
-        if (videoCode.equals(targetVideoCode)) {
-            throw new GeneralException(ErrorStatus._TARGET_VIDEO_IS_SAME);
-        }
+        Playlist playlist = playlistRepositoryService.findByCodeOrThrow(playlistCode);
+
+        userValidator.checkUserIsAdminOfPlaylist(playlist, user);
+        videoValidator.checkVideosAreDifferent(videoCode, targetVideoCode);
 
         // 이동할 위치에 있는 영상
         Video targetVideo = videoRepository.findFirstByPlaylistCodeAndCode(playlistCode,

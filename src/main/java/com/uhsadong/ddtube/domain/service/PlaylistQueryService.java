@@ -9,6 +9,7 @@ import com.uhsadong.ddtube.domain.entity.Playlist;
 import com.uhsadong.ddtube.domain.entity.User;
 import com.uhsadong.ddtube.domain.enums.PlaylistHealth;
 import com.uhsadong.ddtube.domain.repositoryservice.PlaylistRepositoryService;
+import com.uhsadong.ddtube.domain.validator.UserValidator;
 import com.uhsadong.ddtube.global.response.code.status.ErrorStatus;
 import com.uhsadong.ddtube.global.response.exception.GeneralException;
 import java.time.LocalDateTime;
@@ -26,6 +27,7 @@ public class PlaylistQueryService {
     private final PlaylistRepositoryService playlistRepositoryService;
     private final UserQueryService userQueryService;
     private final VideoQueryService videoQueryService;
+    private final UserValidator userValidator;
 
     @Value("${ddtube.playlist.delete_days}")
     private Integer PLAYLIST_DELETE_DAYS;
@@ -43,7 +45,7 @@ public class PlaylistQueryService {
     @Transactional(readOnly = true)
     public PlaylistMetaResponseDTO getPlaylistMetaInformation(User user, String playlistCode) {
         Playlist playlist = playlistRepositoryService.findByCodeOrThrow(playlistCode);
-        userQueryService.checkUserInPlaylist(user, playlist);
+        userValidator.checkUserInPlaylist(user, playlist);
         List<User> userList = userQueryService.getUserListByPlaylistCode(playlistCode);
 
         String ownerName = userList.stream()
@@ -69,7 +71,7 @@ public class PlaylistQueryService {
     @Transactional(readOnly = true)
     public PlaylistDetailResponseDTO getPlaylistDetail(User user, String playlistCode) {
         Playlist playlist = playlistRepositoryService.findByCodeOrThrow(playlistCode);
-        userQueryService.checkUserInPlaylist(user, playlist);
+        userValidator.checkUserInPlaylist(user, playlist);
 
         List<VideoDetailResponseDTO> videoResponseList = videoQueryService.getVideoDetailListByPlaylistCode(
             playlistCode);
