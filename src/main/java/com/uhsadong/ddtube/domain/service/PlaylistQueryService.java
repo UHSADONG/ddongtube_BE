@@ -96,15 +96,21 @@ public class PlaylistQueryService {
             return PlaylistHealthResponseDTO.builder()
                 .health(PlaylistHealth.NOT_EXIST)
                 .playlistCode(playlistCode)
+                .title(null)
+                .thumbnailUrl(null)
+                .description(null)
                 .build();
         }
 
         // 플레이리스트가 존재하는 경우
         PlaylistHealth health = PlaylistUtil.getPlaylistHealth(playlistOptional.get());
-
+        Playlist playlist = playlistOptional.get();
         return PlaylistHealthResponseDTO.builder()
             .health(health)
             .playlistCode(playlistCode)
+            .title(playlist.getTitle())
+            .thumbnailUrl(playlist.getThumbnailUrl())
+            .description(playlist.getDescription())
             .build();
     }
 

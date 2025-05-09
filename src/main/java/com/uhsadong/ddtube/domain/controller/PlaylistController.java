@@ -61,7 +61,7 @@ public class PlaylistController {
     }
 
     @GetMapping("/meta/{playlistCode}/public")
-    @Operation(summary = "재생목록 메타정보 조회 (JWT 불필요)", description = "초대장에서 사용할 메타정보 조회 기능입니다. 초대장 이름, 썸네일 주소, 초대장 설명을 반환합니다.")
+    @Operation(deprecated = true, summary = "재생목록 메타정보 조회 (JWT 불필요)", description = "초대장에서 사용할 메타정보 조회 기능입니다. 초대장 이름, 썸네일 주소, 초대장 설명을 반환합니다.")
     public ResponseEntity<ApiResponse<PlaylistPublicMetaResponseDTO>> getPlaylistPublicMeta(
         @PathVariable String playlistCode
     ) {
