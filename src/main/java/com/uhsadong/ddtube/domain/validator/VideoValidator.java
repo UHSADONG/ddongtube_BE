@@ -5,6 +5,7 @@ import com.uhsadong.ddtube.domain.entity.User;
 import com.uhsadong.ddtube.domain.entity.Video;
 import com.uhsadong.ddtube.global.response.code.status.ErrorStatus;
 import com.uhsadong.ddtube.global.response.exception.GeneralException;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -15,23 +16,19 @@ public class VideoValidator {
     private final UserValidator userValidator;
 
     public void checkVideosAreDifferent(String videoCode1, String videoCode2) {
-        if (videoCode1.equals(videoCode2)) {
+        if (Objects.equals(videoCode1, videoCode2)) {
             throw new GeneralException(ErrorStatus._TARGET_VIDEO_IS_SAME);
         }
     }
 
-    public void checkPermissionOfVideoUpdate(Playlist playlist, Video video, User user) {
-        if (!user.getPlaylist().getId().equals(playlist.getId())) {
-            throw new GeneralException(ErrorStatus._USER_NOT_IN_PLAYLIST);
-        }
-
-        if (!(video.getUser().getId().equals(user.getId()) || user.isAdmin())) {
+    public void checkPermissionOfVideoUpdate(Video video, User user) {
+        if (!(Objects.equals(video.getUser().getId(), user.getId()) || user.isAdmin())) {
             throw new GeneralException(ErrorStatus._VIDEO_DELETE_PERMISSION_DENIED);
         }
     }
 
     public void checkVideoIsNowPlayingInPlaylist(Playlist playlist, Video video) {
-        if (playlist.getNowPlayVideo() != null && video.getId()
+        if (Objects.nonNull(playlist.getNowPlayVideo()) && video.getId()
             .equals(playlist.getNowPlayVideo().getId())) {
             throw new GeneralException(ErrorStatus._CANNOT_DELETE_NOW_PLAY_VIDEO);
         }

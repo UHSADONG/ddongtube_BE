@@ -45,7 +45,7 @@ public class PlaylistQueryService {
     @Transactional(readOnly = true)
     public PlaylistMetaResponseDTO getPlaylistMetaInformation(User user, String playlistCode) {
         Playlist playlist = playlistRepositoryService.findByCodeOrThrow(playlistCode);
-        userValidator.checkUserInPlaylist(user, playlist);
+        userValidator.checkUserInPlaylist(playlist, user);
         List<User> userList = userQueryService.getUserListByPlaylistCode(playlistCode);
 
         String ownerName = userList.stream()
@@ -71,7 +71,7 @@ public class PlaylistQueryService {
     @Transactional(readOnly = true)
     public PlaylistDetailResponseDTO getPlaylistDetail(User user, String playlistCode) {
         Playlist playlist = playlistRepositoryService.findByCodeOrThrow(playlistCode);
-        userValidator.checkUserInPlaylist(user, playlist);
+        userValidator.checkUserInPlaylist(playlist, user);
 
         List<VideoDetailResponseDTO> videoResponseList = videoQueryService.getVideoDetailListByPlaylistCode(
             playlistCode);

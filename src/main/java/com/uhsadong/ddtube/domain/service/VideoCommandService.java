@@ -44,7 +44,7 @@ public class VideoCommandService {
     public void addVideoToPlaylist(
         User user, String playlistCode, AddVideoToPlaylistRequestDTO requestDTO) {
         Playlist playlist = playlistRepositoryService.findByCodeOrThrow(playlistCode);
-        userValidator.checkUserInPlaylist(user, playlist);
+        userValidator.checkUserInPlaylist(playlist, user);
 
         String code = IdGenerator.generateShortId(VIDEO_CODE_LENGTH);
         YoutubeOEmbedDTO youtubeOEmbedDTO = YoutubeOEmbed.getVideoInfo(requestDTO.videoUrl());
@@ -65,11 +65,11 @@ public class VideoCommandService {
     public void deleteVideoFromPlaylist(
         User user, String playlistCode, String videoCode) {
         Playlist playlist = playlistRepositoryService.findByCodeOrThrow(playlistCode);
-        userValidator.checkUserInPlaylist(user, playlist);
+        userValidator.checkUserInPlaylist(playlist, user);
         Video video = videoRepository.findFirstByPlaylistCodeAndCode(playlist.getCode(), videoCode)
             .orElseThrow(() -> new GeneralException(ErrorStatus._VIDEO_NOT_FOUND));
         // 영상을 추가한 사람이거나 플레이리스트의 관리자가 아니면 에러
-        videoValidator.checkPermissionOfVideoUpdate(playlist, video, user);
+        videoValidator.checkPermissionOfVideoUpdate(video, user);
         videoValidator.checkVideoIsNowPlayingInPlaylist(playlist, video);
 
         videoRepository.delete(video);

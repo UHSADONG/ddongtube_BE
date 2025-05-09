@@ -67,7 +67,7 @@ public class PlaylistCommandService {
     @Transactional
     public void deletePlaylist(User user, String playlistCode) {
         Playlist playlist = playlistRepositoryService.findByCodeOrThrow(playlistCode);
-        userValidator.checkUserInPlaylist(user, playlist);
+        userValidator.checkUserInPlaylist(playlist, user);
 
         userValidator.checkUserIsAdminOfPlaylist(playlist, user);
 
@@ -78,7 +78,7 @@ public class PlaylistCommandService {
     public void setNowPlayingVideo(User user, String playlistCode, String videoCode,
         Boolean autoPlay) {
         Playlist playlist = playlistRepositoryService.findByCodeOrThrow(playlistCode);
-        userValidator.checkUserInPlaylist(user, playlist);
+        userValidator.checkUserInPlaylist(playlist, user);
         Video video = videoQueryService.getVideoByCodeOrThrow(videoCode);
         if (playlist.getNowPlayVideo() != null && video.getId()
             .equals(playlist.getNowPlayVideo().getId())) {
