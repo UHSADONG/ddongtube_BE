@@ -122,4 +122,14 @@ public class PlaylistController {
         playlistCommandService.setNowPlayingVideo(user, playlistCode, videoCode, autoPlay);
         return ResponseEntity.ok(ApiResponse.onSuccess("변경 완료"));
     }
+
+    @PatchMapping("/{playlistCode}/restore")
+    @Operation(summary = "펑 터진 플레이리스트를 복구합니다. 추후에 이 과정 사이에 Ads를 넣으면 좋을 것 같습니다.")
+    public ResponseEntity<ApiResponse<String>> restorePlaylist(
+        @CurrentUser User user,
+        @PathVariable String playlistCode
+    ) {
+        playlistCommandService.restorePlaylist(user, playlistCode);
+        return ResponseEntity.ok(ApiResponse.onSuccess("복구 완료"));
+    }
 }

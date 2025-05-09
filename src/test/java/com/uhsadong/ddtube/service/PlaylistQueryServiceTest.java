@@ -22,7 +22,6 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,7 +33,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 @ExtendWith(MockitoExtension.class)
 class PlaylistQueryServiceTest {
 
-    private final Integer deleteAfterDays = 30;
+    private final int deleteAfterDays = 1;
     @InjectMocks
     private PlaylistQueryService playlistQueryService;
     @Mock
@@ -46,10 +45,6 @@ class PlaylistQueryServiceTest {
     @Mock
     private UserValidator userValidator;
 
-    @BeforeEach
-    void setUp() {
-        ReflectionTestUtils.setField(playlistQueryService, "PLAYLIST_DELETE_DAYS", deleteAfterDays);
-    }
 
     @Test
     @DisplayName("플레이리스트 공개 메타 정보 조회 - 코드에 해당하는 플레이리스트의 기본 정보를 반환한다")
