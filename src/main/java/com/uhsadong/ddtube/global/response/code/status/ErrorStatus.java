@@ -35,6 +35,7 @@ public enum ErrorStatus implements BaseErrorCode {
     // PLAYLIST
     _PLAYLIST_NOT_FOUND(HttpStatus.BAD_REQUEST, "PLAYLIST001", "해당 플레이리스트를 찾을 수 없습니다."),
     _PLAYLIST_DELETE_PERMISSION_DENIED(HttpStatus.BAD_REQUEST, "PLAYLIST002", "해당 플레이리스트를 삭제할 권한이 없습니다."),
+    _PLAYLIST_IS_ACTIVE(HttpStatus.BAD_REQUEST, "PLAYLIST003", "해당 플레이리스트는 활성화 상태입니다."),
 
     // USER
     _USER_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "USER001", "이미 존재하는 사용자이며, 비밀번호가 틀렸습니다."),

@@ -5,6 +5,7 @@ import com.uhsadong.ddtube.domain.dto.response.CreatePlaylistResponseDTO;
 import com.uhsadong.ddtube.domain.entity.Playlist;
 import com.uhsadong.ddtube.domain.entity.User;
 import com.uhsadong.ddtube.domain.entity.Video;
+import com.uhsadong.ddtube.domain.repository.PlaylistRepository;
 import com.uhsadong.ddtube.domain.repositoryservice.PlaylistRepositoryService;
 import com.uhsadong.ddtube.domain.validator.PlaylistValidator;
 import com.uhsadong.ddtube.domain.validator.UserValidator;
@@ -26,6 +27,7 @@ public class PlaylistCommandService {
     private final PlaylistRepositoryService playlistRepositoryService;
     private final PlaylistValidator playlistValidator;
     private final UserValidator userValidator;
+    private final PlaylistRepository playlistRepository;
 
     @Value("${ddtube.playlist.code_length}")
     private Integer PLAYLIST_CODE_LENGTH;
@@ -91,6 +93,15 @@ public class PlaylistCommandService {
 
         sseService.sendNowPlayingVideoEventToClients(playlistCode, video, user.getName(), autoPlay);
 
+    }
+
+    @Transactional
+    public void restorePlaylist(User user, String playlistCode) {
+        Playlist playlist = playlistRepositoryService.findByCodeOrThrow(playlistCode);
+        // 플리가 비활성 상태인지 확인
+        playlistValidator.checkPlaylistIsInactive(playlist);
+        userValidator.checkUserInPlaylist(playlist, user);
+        playlistRepository.updateLastLoginAtByPlaylistCode(playlistCode, LocalDateTime.now());
     }
 
 }

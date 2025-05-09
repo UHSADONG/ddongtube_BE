@@ -9,14 +9,13 @@ import com.uhsadong.ddtube.domain.entity.Playlist;
 import com.uhsadong.ddtube.domain.entity.User;
 import com.uhsadong.ddtube.domain.enums.PlaylistHealth;
 import com.uhsadong.ddtube.domain.repositoryservice.PlaylistRepositoryService;
+import com.uhsadong.ddtube.domain.utils.PlaylistUtil;
 import com.uhsadong.ddtube.domain.validator.UserValidator;
 import com.uhsadong.ddtube.global.response.code.status.ErrorStatus;
 import com.uhsadong.ddtube.global.response.exception.GeneralException;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,8 +28,6 @@ public class PlaylistQueryService {
     private final VideoQueryService videoQueryService;
     private final UserValidator userValidator;
 
-    @Value("${ddtube.playlist.delete_days}")
-    private Integer PLAYLIST_DELETE_DAYS;
 
     @Transactional(readOnly = true)
     public PlaylistPublicMetaResponseDTO getPlaylistPublicMetaInformation(String playlistCode) {
@@ -103,17 +100,7 @@ public class PlaylistQueryService {
         }
 
         // 플레이리스트가 존재하는 경우
-        Playlist playlist = playlistOptional.get();
-        PlaylistHealth health;
-
-        // 마지막으로 활성화된 시간 기준으로 PLAYLIST_DELETE_DAYS가 지났으면 INACTIVE 상태
-        if (playlist.getLastLoginAt().plusDays(PLAYLIST_DELETE_DAYS)
-            .isBefore(LocalDateTime.now())) {
-            health = PlaylistHealth.INACTIVE;
-        } else {
-            // 그 외의 경우 ACTIVE 상태
-            health = PlaylistHealth.ACTIVE;
-        }
+        PlaylistHealth health = PlaylistUtil.getPlaylistHealth(playlistOptional.get());
 
         return PlaylistHealthResponseDTO.builder()
             .health(health)
