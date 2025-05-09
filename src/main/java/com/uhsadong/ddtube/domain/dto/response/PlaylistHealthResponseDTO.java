@@ -6,7 +6,10 @@ import lombok.Builder;
 @Builder
 public record PlaylistHealthResponseDTO(
     PlaylistHealth health,
-    String playlistCode
+    String playlistCode,
+    String title,
+    String thumbnailUrl,
+    String description
 ) {
 
 }
