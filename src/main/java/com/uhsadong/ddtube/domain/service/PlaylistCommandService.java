@@ -96,11 +96,10 @@ public class PlaylistCommandService {
     }
 
     @Transactional
-    public void restorePlaylist(User user, String playlistCode) {
+    public void restorePlaylist(String playlistCode) {
         Playlist playlist = playlistRepositoryService.findByCodeOrThrow(playlistCode);
         // 플리가 비활성 상태인지 확인
         playlistValidator.checkPlaylistIsInactive(playlist);
-        userValidator.checkUserInPlaylist(playlist, user);
         playlistRepository.updateLastLoginAtByPlaylistCode(playlistCode, LocalDateTime.now());
     }
 
